@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin • Ambeer Rally</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    h1 { margin: 0 0 10px; }
+    .admin-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .admin-bar input[type="password"], .admin-bar input[type="text"] { padding: 6px 10px; }
+    .muted { opacity: .6; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(0,0,0,.06); padding: 2px 6px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border-bottom: 1px solid rgba(0,0,0,.1); vertical-align: middle; }
+    th { text-align: left; background: rgba(0,0,0,.04); }
+    td.num { text-align: center; white-space: nowrap; }
+    td.right { text-align: right; }
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 999px; font-size: 12px; margin-left: 6px; }
+    .badge.start { background: #e3f2fd; }
+    .badge.last  { background: #fff3e0; }
+    .thumb { width: 72px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(0,0,0,.1); display: block; }
+    details summary { cursor: pointer; }
+    .error { color: #b00020; margin-left: 8px; }
+    .success { color: #1b5e20; }
+    .row-actions button { margin-left: 6px; }
+    .top-actions { display:flex; gap:8px; align-items:center; }
+    .spacer { flex:1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin • Ambeer Rally</h1>
+    <div class="admin-bar">
+      <label for="adminkey"><strong>Clé admin</strong></label>
+      <input id="adminkey" type="password" placeholder="x-admin-key" />
+      <button id="saveKey">Enregistrer</button>
+      <span id="keyStatus" class="muted"></span>
+      <span class="spacer"></span>
+      <div class="top-actions">
+        <button id="refreshNow">Rafraîchir</button>
+        <button id="exportCsv">Export CSV</button>
+        <button id="exportJson">Export JSON</button>
+        <label class="muted">
+          Auto-refresh:
+          <select id="autoint">
+            <option value="0">Off</option>
+            <option value="1000">1s</option>
+            <option value="5000" selected>5s</option>
+            <option value="10000">10s</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <section id="status" class="muted"></section>
+
+  <section>
+    <table id="teamsTable">
+      <thead>
+        <tr>
+          <th>Équipe</th>
+          <th>Étape en cours</th>
+          <th>Miniature</th>
+          <th>Code à donner</th>
+          <th>Indice (mémo)</th>
+          <th>Départ</th>
+          <th>Arrivée</th>
+          <th>Temps</th>
+          <th>Indices</th>
+          <th>Codes faux</th>
+          <th class="right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="11" class="muted">Chargement…</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script>
+    const elKey = document.getElementById('adminkey');
+    const elSaveKey = document.getElementById('saveKey');
+    const elKeyStatus = document.getElementById('keyStatus');
+    const elStatus = document.getElementById('status');
+    const elTbody = document.getElementById('tbody');
+    const elRefreshNow = document.getElementById('refreshNow');
+    const elAutoInt = document.getElementById('autoint');
+
+    function msToClock(ms) {
+      if (ms == null) return "—";
+      const s = Math.floor(ms / 1000);
+      const hh = Math.floor(s / 3600).toString().padStart(2,'0');
+      const mm = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
+      const ss = (s % 60).toString().padStart(2,'0');
+      return `${hh}:${mm}:${ss}`;
+    }
+    function fmtDate(iso) {
+      if (!iso) return "—";
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    function badgeFor(routeIndex, total) {
+      if (!Number.isFinite(total)) return '';
+      if (routeIndex <= 0) return `<span class="badge start">Départ</span>`;
+      if (routeIndex >= total - 1) return `<span class="badge last">Dernière</span>`;
+      return '';
+    }
+    function getKey() { return localStorage.getItem('AMBEER_ADMIN_KEY') || ''; }
+    function setKey(k) {
+      localStorage.setItem('AMBEER_ADMIN_KEY', k || '');
+      elKeyStatus.textContent = k ? "Clé enregistrée" : "Aucune clé";
+      elKeyStatus.className = k ? "success" : "muted";
+    }
+    function authHeaders() {
+      const key = getKey();
+      return key ? { 'x-admin-key': key } : {};
+    }
+    function setStatus(msg, isError=false) {
+      elStatus.textContent = msg || '';
+      elStatus.className = isError ? 'error' : 'muted';
+    }
+    function escapeHtml(s) {
+      if (s == null) return "";
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+
+    function row(t) {
+      const total = Number(t.total) || 0;
+      const idx   = Number(t.routeIndex) || 0;
+
+      // Libellé INVARIABLE : Étape {idx+1} — Nom (si disponible)
+      const order = (idx < total) ? (idx + 1) : total;
+      const label = `Étape ${order}` + (t.stepName ? ` — ${escapeHtml(t.stepName)}` : "");
+
+      const thumbHtml = t.stepPhoto
+        ? `<a href="${t.stepPhoto}" target="_blank" rel="noopener">
+             <img class="thumb" src="${t.stepPhoto}" alt="miniature étape ${order}" />
+           </a>`
+        : `<span class="muted">—</span>`;
+
+      const codeHtml = t.codeToSend
+        ? `<span class="code">${t.codeToSend}</span> <button data-copy="${t.codeToSend}">Copier</button>`
+        : `<span class="muted">n/a</span>`;
+
+      const finished = t.timing?.finished;
+      const startAt = fmtDate(t.timing?.startAt);
+      const finishAt = fmtDate(t.timing?.finishAt);
+      const shownMs = finished ? t.timing?.durationMs : t.timing?.runningElapsedMs;
+      const shownClock = msToClock(shownMs);
+
+      const hintsUsed = Number(t.hintsUsed || 0);
+      const wrongCodes = Number(t.wrongCodes || 0);
+
+      const hintBlock = t.stepHint
+        ? `<details><summary>Voir</summary><div class="muted" style="max-width:280px">${escapeHtml(t.stepHint)}</div></details>`
+        : `<span class="muted">—</span>`;
+
+      return `
+        <tr data-name="${t.name}" data-index="${idx}" data-total="${total}">
+          <td>${t.name}</td>
+          <td class="num">${label} ${badgeFor(idx, total)}</td>
+          <td>${thumbHtml}</td>
+          <td>${codeHtml}</td>
+          <td>${hintBlock}</td>
+          <td class="num">${startAt}</td>
+          <td class="num">${finishAt}</td>
+          <td class="num"><strong>${shownClock}</strong></td>
+          <td class="num">${hintsUsed}</td>
+          <td class="num">${wrongCodes}</td>
+          <td class="right row-actions">
+            <button data-delta="-1">-1</button>
+            <button data-delta="1">+1</button>
+            <button data-reset="${t.name}">Reset</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function renderTable(data) {
+      const teams = data?.teams || [];
+      if (!teams.length) {
+        elTbody.innerHTML = `<tr><td colspan="11" class="muted">Aucune équipe pour le moment.</td></tr>`;
+        return;
+      }
+      elTbody.innerHTML = teams.map(t => row(t)).join('');
+    }
+
+    async function fetchOverview() {
+      try {
+        const res = await fetch('/api/admin/overview', { headers: { ...authHeaders() } });
+        if (!res.ok) {
+          const txt = await res.text().catch(()=>res.statusText);
+          throw new Error(`HTTP ${res.status} – ${txt || res.statusText}`);
+        }
+        const data = await res.json();
+        if (!data?.ok) throw new Error(data?.error || 'Erreur inconnue');
+        renderTable(data);
+        setStatus('');
+      } catch (err) {
+        setStatus(`Erreur chargement: ${err.message}`, true);
+      }
+    }
+
+    async function shiftIndex(name, delta) {
+      const res = await fetch('/api/admin/shift-index', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ name, delta })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data?.ok) throw new Error(data?.error || 'Erreur shift-index');
+      return data;
+    }
+
+    async function resetTeam(name) {
+      const res = await fetch('/api/admin/reset-team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ name })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data?.ok) throw new Error(data?.error || 'Erreur reset-team');
+      return data;
+    }
+
+    document.getElementById('saveKey').addEventListener('click', () => { setKey(elKey.value.trim()); fetchOverview(); });
+    document.getElementById('refreshNow').addEventListener('click', () => fetchOverview());
+    document.getElementById('autoint').addEventListener('change', () => setupInterval(Number(elAutoInt.value)));
+
+    elTbody.addEventListener('click', async (e) => {
+      const t = e.target;
+      if (!(t instanceof HTMLElement)) return;
+
+      if (t.hasAttribute('data-copy')) {
+        const val = t.getAttribute('data-copy') || '';
+        if (!val) return;
+        try { await navigator.clipboard.writeText(val); t.textContent = "Copié !"; setTimeout(()=>{ t.textContent = "Copier"; }, 900); }
+        catch {
+          const ta = document.createElement('textarea');
+          ta.value = val; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        return;
+      }
+
+      const nameReset = t.getAttribute('data-reset');
+      const deltaAttr = t.getAttribute('data-delta');
+
+      try {
+        if (deltaAttr) {
+          const tr = t.closest('tr');
+          const name = tr?.getAttribute('data-name');
+          const delta = Number(deltaAttr);
+          if (name && Number.isFinite(delta)) { await shiftIndex(name, delta); await fetchOverview(); }
+        } else if (nameReset) {
+          if (confirm(`Réinitialiser l'équipe "${nameReset}" ?`)) { await resetTeam(nameReset); await fetchOverview(); }
+        }
+      } catch (err) {
+        setStatus(err.message || 'Erreur action', true);
+      }
+    });
+
+    let refreshHandle = null;
+    function setupInterval(ms) {
+      if (refreshHandle) clearInterval(refreshHandle);
+      if (ms && ms > 0) refreshHandle = setInterval(fetchOverview, ms);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) setupInterval(0);
+      else setupInterval(Number(elAutoInt.value));
+    });
+
+    (function init() {
+      const saved = getKey();
+      if (saved) { elKey.value = saved; elKeyStatus.textContent = "Clé enregistrée"; elKeyStatus.className = "success"; }
+      else { elKeyStatus.textContent = "Aucune clé"; elKeyStatus.className = "muted"; }
+      fetchOverview();
+      setupInterval(Number(elAutoInt.value));
+    })();
+
+    async function downloadExport(format) {
+      try {
+        const res = await fetch(`/api/admin/export?format=${encodeURIComponent(format)}`, { headers: { ...authHeaders() } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        let filename = `ambeer_scores.${format === 'json' ? 'json' : 'csv'}`;
+        const cd = res.headers.get('Content-Disposition') || '';
+        const m = cd.match(/filename="([^"]+)"/i);
+        if (m && m[1]) filename = m[1];
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        setStatus(`Export ${format.toUpperCase()} téléchargé.`);
+      } catch (err) {
+        setStatus(`Erreur export: ${err.message}`, true);
+      }
+    }
+    document.getElementById('exportCsv').addEventListener('click', () => downloadExport('csv'));
+    document.getElementById('exportJson').addEventListener('click', () => downloadExport('json'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ambeer Rally</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
+    .panel { background: rgba(0,0,0,.04); border-radius: 10px; padding: 12px; }
+    .leaderboard { width: 100%; border-collapse: collapse; }
+    .leaderboard th, .leaderboard td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,.1); }
+    .leaderboard th { text-align: left; background: rgba(0,0,0,.05); }
+    .muted { opacity: .7; }
+    .num { text-align: right; white-space: nowrap; }
+    .hidden { display: none !important; }
+    .ok { color: #34d399; }
+    .err { color: #f87171; }
+    aside h2 { margin: 0 0 10px; color: #ffd166; font-size: 1.05rem; }
+    section h2 { margin: 0 0 10px; color: #ffd166; }
+    #registerArea { margin-bottom: 10px; }
+    #teamDisplay { margin: 6px 0 10px; }
+    #teamDisplay strong { color: #ffd166; }
+    .timer { font-weight: 600; margin: 4px 0 8px; }
+    .step-photo { opacity: 0; transition: opacity .25s ease; }
+    .step-photo.loaded { opacity: 1; }
+    #steps { list-style: none; padding-left: 0; }
+    #steps li.step { padding: 6px 8px; border-radius: 6px; }
+    #steps li.step.done { opacity: .6; }
+    #steps li.step.pending { background: rgba(255, 209, 102, .15); }
+    
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Ambeer Rally</h1>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <h2>Votre progression</h2>
+        <div id="registerArea">
+          <label for="teamName" class="muted">Nom d’équipe</label>
+          <input id="teamName" type="text" placeholder="Votre équipe" />
+          <button id="registerBtn">S’inscrire</button>
+        </div>
+        <div id="teamDisplay" class="muted hidden">
+          Équipe : <strong id="teamNameDisplay"></strong>
+        </div>
+        <ul id="steps"></ul>
+      </aside>
+
+      <section class="content">
+        <div class="panel" id="stepPanel">
+          <h2 id="stepTitle">Étape</h2>
+          <div id="liveTimer" class="timer">⏱ 00:00:00</div>
+          <img id="stepImage" class="step-photo" loading="lazy" alt="Photo d'étape" />
+          <p id="stepLegend" class="muted"></p>
+
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="hintBtn" type="button">Indice</button>
+            <input id="code" type="text" placeholder="Code (ZIP)" />
+            <button id="validateBtn">Valider</button>
+            <span id="feedback" class="muted" style="flex:1 0 100%;"></span>
+          </div>
+
+          <div id="cheers-animation" class="cheers">
+            <img class="beer beer-left" src="/photos/beer-left.png" alt="" />
+            <img class="beer beer-right" src="/photos/beer-right.png" alt="" />
+          </div>
+          <audio id="cheers-sound" preload="auto" src="/cheers.mp3"></audio>
+        </div>
+
+        <div class="panel hidden" id="leaderboardPanel">
+          <h2>🏆 Classement</h2>
+          <table class="leaderboard" id="leaderboardTable">
+            <thead>
+              <tr>
+                <th>Place</th>
+                <th>Équipe</th>
+                <th class="num">Étapes validées</th>
+                <th class="num">Temps</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <tr><td colspan="4" class="muted">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ========= ÉTAT =========
+    let routeSteps = [];   // ordre EXACT de la route (pas trié par id)
+    let currentIndex = 0;  // pointeur sur la prochaine étape à valider
+    let teamName = "";
+    let isValidating = false;
+    let lbInterval = null;
+    let timerHandle = null;
+    let startAtISO = null;
+    let finishAtISO = null;
+
+    // ========= HELPERS =========
+    const qs = (id) => document.getElementById(id);
+
+    function msToClock(ms) {
+      if (ms == null) return "00:00:00";
+      const s = Math.max(0, Math.floor(ms / 1000));
+      const hh = Math.floor(s / 3600).toString().padStart(2,'0');
+      const mm = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
+      const ss = (s % 60).toString().padStart(2,'0');
+      return `${hh}:${mm}:${ss}`;
+    }
+    function updateTimerLabel(ms) { qs("liveTimer").textContent = `⏱ ${msToClock(ms)}`; }
+    function stopLiveTimer() { if (timerHandle) { clearInterval(timerHandle); timerHandle = null; } }
+    function startLiveTimer(startISO, finishISO=null) {
+      startAtISO = startISO || startAtISO;
+      finishAtISO = finishISO || null;
+      stopLiveTimer();
+      if (!startAtISO) { updateTimerLabel(0); return; }
+      const tick = () => {
+        const start = new Date(startAtISO).getTime();
+        const end = finishAtISO ? new Date(finishAtISO).getTime() : Date.now();
+        updateTimerLabel(end - start);
+        if (finishAtISO) stopLiveTimer();
+      };
+      tick();
+      if (!finishAtISO) timerHandle = setInterval(tick, 1000);
+    }
+    function setFeedback(msg, ok=false) {
+      const el = qs("feedback");
+      el.textContent = msg || "";
+      el.className = ok ? "ok" : (msg ? "err" : "muted");
+    }
+    function toggleLeaderboard(show) {
+      const stepPanel = qs("stepPanel");
+      const lbPanel = qs("leaderboardPanel");
+      if (show) {
+        stepPanel.classList.add("hidden");
+        lbPanel.classList.remove("hidden");
+        if (!lbInterval) { loadLeaderboard(); lbInterval = setInterval(loadLeaderboard, 2000); }
+      } else {
+        lbPanel.classList.add("hidden");
+        stepPanel.classList.remove("hidden");
+        if (lbInterval) { clearInterval(lbInterval); lbInterval = null; }
+      }
+    }
+
+    // ========= RÉCAP (ordre séquentiel) =========
+    function renderSteps() {
+      const list = qs("steps");
+      list.innerHTML = routeSteps.map((s, idx) => {
+        const state = (idx < currentIndex) ? 'done' : (idx === currentIndex ? 'pending' : 'locked');
+        const label = `Étape ${idx + 1}` + (s.displayName ? ` — ${s.displayName}` : "");
+        return `<li class="step ${state}"><strong>${label}</strong></li>`;
+      }).join("");
+    }
+
+    // ========= CHARGER UNE ÉTAPE =========
+    function loadStepByIndex(idx) {
+      const s = routeSteps[idx];
+      if (!s) return;
+
+      const img = qs("stepImage");
+      img.classList.remove("loaded");
+      img.onload = () => img.classList.add("loaded");
+      img.onerror = () => img.classList.remove("loaded");
+
+      const imgSrc = s.photo || s.image || "";
+      img.src = imgSrc;
+      img.style.display = imgSrc ? "block" : "none";
+
+      qs("stepLegend").textContent = "";
+      qs("stepTitle").textContent = `Étape ${idx + 1}` + (s.displayName ? ` — ${s.displayName}` : "");
+
+      // Pré-chargement de la suivante
+      const next = routeSteps[idx + 1];
+      if (next && (next.photo || next.image)) { const pre = new Image(); pre.src = next.photo || next.image; }
+      renderSteps();
+    }
+
+    // ========= INDICE =========
+    async function fetchHint(stepId) {
+      const url = teamName ? `/hint/${stepId}?name=${encodeURIComponent(teamName)}` : `/hint/${stepId}`;
+      const res = await fetch(url);
+      const data = await res.json().catch(() => ({}));
+      return (data && data.hint) ? data.hint : "Aucun indice disponible.";
+    }
+    let lastHintForIndex = -1;
+    async function showHintForCurrent() {
+      if (!teamName) { setFeedback("Inscris ton équipe avant de demander un indice."); return; }
+      if (lastHintForIndex === currentIndex) { qs("stepLegend").style.opacity = 0.9; return; }
+      const stepId = routeSteps[currentIndex]?.id;
+      const text = await fetchHint(stepId);
+      qs("stepLegend").textContent = text || "";
+      qs("stepLegend").style.opacity = 0.9;
+      lastHintForIndex = currentIndex;
+    }
+
+    // ========= VALIDATION =========
+    async function validateCode() {
+      if (isValidating) return;
+      isValidating = true;
+      try {
+        const codeInput = qs("code");
+        const code = codeInput.value.trim();
+        const step = routeSteps[currentIndex];
+        if (!teamName) { setFeedback("Renseigne d’abord le nom d’équipe."); return; }
+        if (!step) { setFeedback("Étape introuvable."); return; }
+
+        const resp = await fetch("/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: teamName, stepId: step.id, zip: code })
+        }).then(r => r.json());
+
+        if (!resp || resp.ok === false) {
+          setFeedback(resp?.message || "❌ Code incorrect, réessaie.");
+          codeInput.focus();
+          return;
+        }
+
+        if (resp?.timing?.started) {
+          startLiveTimer(resp.timing.startAt, resp.timing.finishAt || null);
+        }
+
+        setFeedback("✅ Bravo, étape validée !", true);
+        const cheers = qs("cheers-animation");
+        if (cheers) { cheers.classList.remove("active"); void cheers.offsetWidth; cheers.classList.add("active"); }
+        const audio = qs("cheers-sound");
+        if (audio) audio.play().catch(()=>{});
+
+        codeInput.value = "";
+        codeInput.focus();
+
+        // Avance selon l’index renvoyé
+        currentIndex = resp.routeIndex;
+        if (currentIndex < routeSteps.length) {
+          loadStepByIndex(currentIndex);
+        } else {
+          setFeedback("🏁 Toutes les étapes sont terminées !");
+          toggleLeaderboard(true);
+        }
+
+      } catch {
+        setFeedback("Erreur réseau, réessaie.");
+      } finally {
+        setTimeout(()=>{ isValidating = false; }, 150);
+      }
+    }
+
+    // ========= LEADERBOARD =========
+    async function loadLeaderboard() {
+      try {
+        const data = await fetch("/leaderboard").then(r => r.json());
+        const body = qs("leaderboardBody");
+        if (!data || data.ok === false) {
+          body.innerHTML = `<tr><td colspan="4" class="muted">Impossible de charger le classement</td></tr>`;
+          return;
+        }
+        const list = data.leaderboard || [];
+        if (!list.length) {
+          body.innerHTML = `<tr><td colspan="4" class="muted">Aucune équipe pour le moment.</td></tr>`;
+          return;
+        }
+        body.innerHTML = list.map((t, i) => {
+          const done = Number(t.routeIndex) || 0;
+          const total = Number(t.total) || 0;
+          const finished = !!t.finished;
+          const shownMs = finished ? t.durationMs : t.runningElapsedMs;
+          return `
+            <tr>
+              <td>${i+1}</td>
+              <td>${t.name}</td>
+              <td class="num">${done}/${total}</td>
+              <td class="num"><strong>${msToClock(shownMs)}</strong>${finished ? " ✅" : ""}</td>
+            </tr>
+          `;
+        }).join("");
+      } catch {
+        qs("leaderboardBody").innerHTML = `<tr><td colspan="4" class="muted">Erreur de chargement du leaderboard</td></tr>`;
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && lbInterval) { clearInterval(lbInterval); lbInterval = null; }
+      else if (!document.hidden && !lbInterval && !qs("leaderboardPanel").classList.contains("hidden")) {
+        loadLeaderboard();
+        lbInterval = setInterval(loadLeaderboard, 2000);
+      }
+    });
+
+    // ========= ROUTE =========
+    async function loadTeamRouteOrGlobal() {
+      if (teamName) {
+        try {
+          const r = await fetch(`/team-route/${encodeURIComponent(teamName)}`).then(x=>x.json());
+          if (r && r.ok) {
+            // IMPORTANT : respecter l'ordre DEJA calculé côté serveur (aucun tri ici)
+            routeSteps = (r.steps || []).map((s, i) => ({
+              ...s,
+              photo: s.photo || s.image || "",
+              displayName: s.name || s.title || s.label || null,
+              order: i + 1
+            }));
+            currentIndex = r.routeIndex || 0;
+            renderSteps();
+            loadStepByIndex(currentIndex);
+            return;
+          }
+        } catch {}
+      }
+      // Fallback (rare) : on garde l’ordre d’origine tel quel
+      const res = await fetch("/steps");
+      const arr = await res.json();
+      routeSteps = (arr || []).map((s, i) => ({
+        ...s,
+        photo: s.photo || s.image || "",
+        displayName: s.name || s.title || s.label || null,
+        order: i + 1
+      }));
+      currentIndex = 0;
+      renderSteps();
+      loadStepByIndex(currentIndex);
+    }
+
+    // ========= INSCRIPTION =========
+    async function registerTeam() {
+      const nameInput = qs("teamName");
+      const name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      teamName = name;
+      localStorage.setItem("AMBEER_TEAM_NAME", teamName);
+      try {
+        await fetch("/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: teamName })
+        });
+      } catch {}
+      qs("registerArea").classList.add("hidden");
+      qs("teamNameDisplay").textContent = teamName;
+      qs("teamDisplay").classList.remove("hidden");
+      setFeedback(`Équipe « ${teamName} » inscrite.`, true);
+      qs("code").focus();
+      updateTimerLabel(0);
+      await loadTeamRouteOrGlobal();
+    }
+
+    // ========= BIND =========
+    qs("validateBtn").addEventListener("click", validateCode);
+    qs("registerBtn").addEventListener("click", registerTeam);
+    qs("hintBtn").addEventListener("click", showHintForCurrent);
+    qs("teamName").addEventListener("keydown", (e) => { if (e.key === "Enter") registerTeam(); });
+    qs("code").addEventListener("keydown", (e) => { if (e.key === "Enter") validateCode(); });
+
+    // ========= BOOT =========
+    (async function boot() {
+      const saved = localStorage.getItem("AMBEER_TEAM_NAME");
+      if (saved) {
+        try {
+          const res = await fetch(`/team/${encodeURIComponent(saved)}`).then(r => r.json());
+          if (res && res.exists) {
+            teamName = saved;
+            qs("registerArea").classList.add("hidden");
+            qs("teamNameDisplay").textContent = teamName;
+            qs("teamDisplay").classList.remove("hidden");
+            const t = res.team;
+            if (t.startAt) startLiveTimer(t.startAt, t.finishAt || null);
+            else updateTimerLabel(0);
+          } else {
+            localStorage.removeItem("AMBEER_TEAM_NAME");
+            teamName = "";
+            qs("registerArea").classList.remove("hidden");
+            qs("teamDisplay").classList.add("hidden");
+            updateTimerLabel(0);
+          }
+        } catch {
+          teamName = saved;
+          qs("registerArea").classList.add("hidden");
+          qs("teamNameDisplay").textContent = teamName;
+          qs("teamDisplay").classList.remove("hidden");
+          updateTimerLabel(0);
+        }
+      } else {
+        updateTimerLabel(0);
+      }
+      await loadTeamRouteOrGlobal();
+    })();
+  </script>
+</body>
+</html>
