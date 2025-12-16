@@ -1,0 +1,5 @@
+[
+  { "code": "RALLY10", "path": "/rallyphoto/index.html", "label": "Rally Photo" },
+  { "code": "QUIZ10",  "path": "/quiz/index.html",  "label": "Quiz Team" },
+  { "code": "ESCAPE20","path": "/escape/index.html","label": "Escape Game" }
+]

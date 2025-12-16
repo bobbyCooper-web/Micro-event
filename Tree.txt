@@ -1,0 +1,15 @@
+Racine (micro-event)
+|-Public
+|	|-index.html
+|rallyphoto
+|	|-photos
+|	|-admin.html
+|	|-index.html
+|	|-server.js
+|	|-steps.json
+|	|-style.css
+|-.gitattributes
+|-.gitignore
+|-acces-codes.json
+|-package.json
+|-server.js
