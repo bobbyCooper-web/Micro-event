@@ -89,17 +89,17 @@
       {
         title: "Rally Photo",
         text: "Course d’orientation + indices + validation par code. Idéal team-building rapide.",
-        img: "/hub/slide-rally.jpg"
+        img: "/hub/slide-rally.png"
       },
       {
         title: "Quiz Team (bientôt)",
         text: "Questions, défis, manches chronométrées. Parfait pour des équipes mixtes.",
-        img: "/hub/slide-quiz.jpg"
+        img: "/hub/slide-quiz.png"
       },
       {
         title: "Escape Game (bientôt)",
         text: "Énigmes, narration, progression par paliers. Format immersion.",
-        img: "/hub/slide-escape.jpg"
+        img: "/hub/slide-escape.png"
       }
     ];
 
@@ -149,6 +149,8 @@
       showSlide(Number(t.dataset.i));
       startAuto();
     });
+    
+    let isAccessing = false;
 
     async function access() {
   if (isAccessing) return;
