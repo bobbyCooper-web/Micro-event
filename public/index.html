@@ -2,54 +2,134 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Micro-Event</title>
+  <title>Micro-Event • Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/style.css" />
 
+  <!-- CSS global + CSS Hub -->
+  <link rel="stylesheet" href="/hub.css" />
+  <!-- si tu as créé un fichier dédié -->
+  <!-- <link rel="stylesheet" href="/hub.css" /> -->
 </head>
+
 <body class="hub-page">
   <div class="app">
+
+    <!-- ===== HEADER ===== -->
     <header>
-      <h1>Ambeer Events</h1>
-      <div class="muted">Hub • Choisissez votre expérience</div>
+      <div>
+        <h1>Micro-Event</h1>
+        <div class="muted">Hub • Choisissez votre expérience</div>
+      </div>
     </header>
 
+    <!-- ===== LAYOUT HUB ===== -->
     <main class="hub">
-  <section class="hero">...</section>
 
-  <aside class="hub-side">
-    <div class="card">
-      <!-- ton contenu Accès par code inchangé -->
-      ...
-    </div>
+      <!-- ===== SLIDER / PRÉSENTATION ===== -->
+      <section class="hero">
 
-    <div class="card">
-      <h2 style="margin-top:0;">Autres thèmes</h2>
-      <div class="theme-grid" id="themeGrid"></div>
-      <div class="muted" style="margin-top:10px;">
-        Ici tu pourras proposer d'autres univers (quiz, escape, indoor, etc.).
-      </div>
-    </div>
-  </aside>
-</main>
+        <!-- Frame téléphone -->
+        <div class="slide-frame">
+          <img id="slideImg" alt="Présentation événement" loading="lazy" />
+        </div>
 
+        <!-- Texte associé -->
+        <div class="overlay">
+          <h2 id="slideTitle">Chargement…</h2>
+          <p id="slideText" class="muted"></p>
+          <div class="dots" id="dots"></div>
+        </div>
+
+      </section>
+
+      <!-- ===== COLONNE DROITE ===== -->
+      <aside class="hub-side">
+
+        <!-- ===== ACCÈS PAR CODE ===== -->
+        <div class="card">
+          <h2>Accès par code</h2>
+
+          <p class="muted">
+            Entrez le code fourni après validation pour accéder à votre expérience.
+          </p>
+
+          <div class="access-row">
+            <input
+              id="accessCode"
+              type="text"
+              placeholder="Ex : RALLY10"
+              autocomplete="off"
+            />
+            <button id="goBtn" type="button">Accéder</button>
+          </div>
+
+          <div id="msg" class="msg muted"></div>
+        </div>
+
+        <!-- ===== AUTRES THÈMES (FUTUR) ===== -->
+        <div class="card">
+          <h2>Autres formats</h2>
+
+          <div class="theme-grid" id="themeGrid">
+            <!-- Exemple statique, tu pourras générer ça dynamiquement plus tard -->
+            <div class="theme-card active">
+              <div class="theme-thumb">
+                <img src="/hub/thumb-outdoor.png" alt="" />
+              </div>
+              <div class="theme-info">
+                <div class="theme-title">Grand air & équipes</div>
+                <div class="theme-desc">Rally, orientation, défis terrain</div>
+              </div>
+            </div>
+
+            <div class="theme-card">
+              <div class="theme-thumb">
+                <img src="/hub/thumb-quiz.png" alt="" />
+              </div>
+              <div class="theme-info">
+                <div class="theme-title">Quiz / plateau</div>
+                <div class="theme-desc">Bientôt disponible</div>
+              </div>
+            </div>
+
+            <div class="theme-card">
+              <div class="theme-thumb">
+                <img src="/hub/thumb-escape.png" alt="" />
+              </div>
+              <div class="theme-info">
+                <div class="theme-title">Escape Game</div>
+                <div class="theme-desc">Indoor & outdoor</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:10px;">
+            Ces formats seront activables progressivement.
+          </div>
+        </div>
+
+      </aside>
+    </main>
   </div>
 
+  <!-- ===== SCRIPT ===== -->
   <script>
+    /* ================= SLIDES ================= */
+
     const slides = [
       {
         title: "Rally Photo",
-        text: "Course d’orientation + indices + validation par code. Idéal team-building rapide.",
+        text: "Épreuve d’orientation en équipe avec indices, validation par code et classement.",
         img: "/hub/slide-rally.png"
       },
       {
         title: "Quiz Team (bientôt)",
-        text: "Questions, défis, manches chronométrées. Parfait pour des équipes mixtes.",
+        text: "Questions, défis chronométrés et manches collectives.",
         img: "/hub/slide-quiz.png"
       },
       {
         title: "Escape Game (bientôt)",
-        text: "Énigmes, narration, progression par paliers. Format immersion.",
+        text: "Énigmes, narration et progression immersive.",
         img: "/hub/slide-escape.png"
       }
     ];
@@ -57,27 +137,28 @@
     let idx = 0;
     let timer = null;
 
-    const elImg = document.getElementById("slideImg");
+    const elImg   = document.getElementById("slideImg");
     const elTitle = document.getElementById("slideTitle");
-    const elText = document.getElementById("slideText");
-    const elDots = document.getElementById("dots");
-    const elCode = document.getElementById("accessCode");
-    const elMsg = document.getElementById("msg");
+    const elText  = document.getElementById("slideText");
+    const elDots  = document.getElementById("dots");
+    const elCode  = document.getElementById("accessCode");
+    const elMsg   = document.getElementById("msg");
 
-    function setMsg(text, type) {
+    function setMsg(text, type="muted") {
       elMsg.textContent = text || "";
-      elMsg.className = "msg " + (type || "muted");
+      elMsg.className = "msg " + type;
     }
 
     function renderDots() {
       elDots.innerHTML = slides.map((_, i) =>
-        `<div class="dot ${i===idx?'active':''}" data-i="${i}"></div>`
+        `<div class="dot ${i === idx ? "active" : ""}" data-i="${i}"></div>`
       ).join("");
     }
 
     function showSlide(i) {
       idx = (i + slides.length) % slides.length;
       const s = slides[idx];
+
       elTitle.textContent = s.title;
       elText.textContent = s.text;
 
@@ -90,56 +171,72 @@
     }
 
     function startAuto() {
-      if (timer) clearInterval(timer);
+      clearInterval(timer);
       timer = setInterval(() => showSlide(idx + 1), 4500);
     }
 
     elDots.addEventListener("click", (e) => {
-      const t = e.target;
-      if (!t || !t.dataset || t.dataset.i == null) return;
-      showSlide(Number(t.dataset.i));
+      const i = e.target?.dataset?.i;
+      if (i == null) return;
+      showSlide(Number(i));
       startAuto();
     });
-    
+
+    /* ================= ACCÈS PAR CODE ================= */
+
     let isAccessing = false;
 
     async function access() {
-  if (isAccessing) return;
-  isAccessing = true;
+      if (isAccessing) return;
+      isAccessing = true;
 
-  const code = (elCode.value || "").trim().replace(/\s+/g, "").toUpperCase();
-  if (!code) { setMsg("Entrez un code.", "err"); elCode.focus(); isAccessing=false; return; }
+      const code = (elCode.value || "")
+        .trim()
+        .replace(/\s+/g, "")
+        .toUpperCase();
 
-  setMsg("Vérification…", "muted");
-  try {
-    const res = await fetch("/api/access", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code })
-    });
+      if (!code) {
+        setMsg("Veuillez entrer un code.", "err");
+        elCode.focus();
+        isAccessing = false;
+        return;
+      }
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok) {
-      setMsg(data.error || "Code invalide.", "err");
-      isAccessing = false;
-      return;
+      setMsg("Vérification…", "muted");
+
+      try {
+        const res = await fetch("/api/access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          setMsg(data.error || "Code invalide.", "err");
+          isAccessing = false;
+          return;
+        }
+
+        setMsg(`Accès validé : ${data.label || "événement"}…`, "ok");
+        window.location.href = data.path;
+
+      } catch {
+        setMsg("Erreur réseau. Réessayez.", "err");
+        isAccessing = false;
+      }
     }
 
-    setMsg(`Accès OK : ${data.label || "jeu"}… redirection`, "ok");
-    window.location.href = data.path;
-  } catch {
-    setMsg("Erreur réseau. Réessayez.", "err");
-    isAccessing = false;
-  }
-}
-
     document.getElementById("goBtn").addEventListener("click", access);
-    elCode.addEventListener("keydown", (e) => { if (e.key === "Enter") access(); });
+    elCode.addEventListener("keydown", e => {
+      if (e.key === "Enter") access();
+    });
 
-    // Boot
+    /* ================= BOOT ================= */
     showSlide(0);
     startAuto();
-    setMsg("", "muted");
+    setMsg("");
   </script>
 </body>
 </html>
