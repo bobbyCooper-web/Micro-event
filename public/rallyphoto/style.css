@@ -1,152 +1,164 @@
-/* === Style général Ambeer === */
-* {
-  box-sizing: border-box;
-}
-.timer { font-weight: 600; margin: 4px 0 8px; }
-.step-photo { opacity: 0; transition: opacity .25s ease; }
-.step-photo.loaded { opacity: 1; }
+/* =========================================================
+   Micro-Event Rally • Style neutre (remplace style.css)
+   Compatible avec : .app / header / .sidebar / .step states
+   + timer / leaderboard / animation cheers
+   ========================================================= */
 
-body {
-  font-family: 'Poppins', Arial, sans-serif;
+/* --------- Reset & base --------- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+:root{
+  /* Palette neutre */
+  --bg0: #070b14;           /* fond profond */
+  --bg1: #0b1222;           /* fond principal */
+  --panel: #0f172a;         /* panneaux */
+  --card: #101c36;          /* cartes (sidebar/step) */
+  --card2:#0c142a;          /* cartes alternées */
+
+  --text: #e5e7eb;          /* texte principal */
+  --muted:#a3adc2;          /* texte secondaire */
+  --muted2: rgba(229,231,235,.75);
+
+  --border: rgba(148,163,184,.18);
+  --border2: rgba(148,163,184,.28);
+
+  --accent: #3b82f6;        /* bleu neutre */
+  --accent2:#60a5fa;
+
+  --ok: #22c55e;
+  --err:#ef4444;
+  --warn:#f59e0b;
+
+  --shadow: 0 14px 40px rgba(0,0,0,.55);
+  --shadow2: 0 8px 24px rgba(0,0,0,.45);
+
+  --radius: 14px;
+  --radius2: 12px;
+}
+
+body{
   margin: 0;
-  background: radial-gradient(circle at top, #0b1320, #091121);
-  color: #f2f3f4;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 25% 0%, rgba(96,165,250,.18), transparent 55%),
+    radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,.14), transparent 60%),
+    radial-gradient(circle at top, var(--bg1), var(--bg0));
 }
 
-/* === Conteneur principal === */
-.app {
+/* --------- Containers --------- */
+.app{
   max-width: 1100px;
-  margin: 30px auto;
-  padding: 25px;
-  background: #121b2f;
-  border-radius: 14px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 209, 102, 0.25);
+  margin: 28px auto;
+  padding: 22px;
+  background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(11,18,34,.92));
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
-/* === En-tête === */
-header {
+/* Header */
+header{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  background: linear-gradient(90deg, #15254b, #0b1320);
-  padding: 15px 25px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 209, 102, 0.25);
-  box-shadow: 0 0 15px rgba(255, 209, 102, 0.15);
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border-radius: var(--radius2);
+  border: 1px solid var(--border);
+  background: linear-gradient(90deg, rgba(7,11,20,.85), rgba(15,23,42,.85));
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
 }
 
-header h1 {
+header h1{
   margin: 0;
-  font-size: 1.8rem;
-  color: #ffd166;
-  letter-spacing: 1px;
-  text-shadow: 
-    0 0 8px rgba(255, 180, 70, 0.4),
-    0 0 12px rgba(255, 180, 70, 0.25),
-    1px 1px 2px rgba(0, 0, 0, 0.8);
-  -webkit-text-stroke: 0.5px #1a2238;
+  font-size: 1.6rem;
+  letter-spacing: .4px;
+  color: var(--text);
+  font-weight: 700;
 }
 
-/* === Zone d'inscription === */
-#registerArea input {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ffd166;
-  background: #0f1724;
-  color: #ffd166;
-  outline: none;
-  text-shadow: 0 0 5px rgba(255, 180, 70, 0.3);
+/* --------- Layout helpers (utilisés dans index.html inline styles) --------- */
+.layout{
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  align-items: start;
 }
 
-#registerArea button {
-  padding: 8px 14px;
-  margin-left: 8px;
-  background: linear-gradient(135deg, #ffb347, #ffd166);
-  color: #0b1320;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.2s ease;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2);
-}
-
-#registerArea button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 209, 102, 0.4);
-}
-
-/* === Mise en page principale === */
-main {
-  display: flex;
-  gap: 20px;
-}
-
-/* === Sidebar / Récap étapes === */
-aside,
-.sidebar {
-  width: 260px;
-  background: #0f1a33;
+.panel{
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius2);
   padding: 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 209, 102, 0.35);
-  box-shadow: inset 0 0 0 1px rgba(11, 19, 32, 0.6), 0 8px 20px rgba(0,0,0,.45);
 }
 
-aside h3,
-.sidebar h2 {
+/* Responsive */
+@media (max-width: 920px){
+  .app{ margin: 14px; padding: 16px; }
+  .layout{ grid-template-columns: 1fr; }
+}
+
+/* --------- Typography helpers --------- */
+.muted{ opacity: .78; color: var(--muted); }
+.num{ text-align: right; white-space: nowrap; }
+.hidden{ display: none !important; }
+
+/* Headings inside sections/asides */
+aside h2, aside h3, section h2{
   margin: 0 0 10px 0;
-  color: #ffd166;
+  color: var(--text);
   font-size: 1.05rem;
-  letter-spacing: .3px;
-  text-shadow:
-    0 0 8px rgba(255, 180, 70, .35),
-    0 0 12px rgba(255, 180, 70, .2),
-    1px 1px 2px rgba(0, 0, 0, .85);
-  -webkit-text-stroke: .3px #0b1320;
+  letter-spacing: .2px;
 }
 
-/* Liste des étapes */
-#steps {
+/* --------- Sidebar --------- */
+aside, .sidebar{
+  background: linear-gradient(180deg, rgba(16,28,54,.9), rgba(12,20,42,.9));
+  border-radius: var(--radius2);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow2);
+  padding: 14px;
+}
+
+/* Liste étapes */
+#steps{
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 /* Carte d’étape */
-.step {
+.step{
   position: relative;
   margin: 10px 0;
   padding: 10px 12px;
-  border-radius: 10px;
-  background: #0c1730;
-  border: 1px solid rgba(255, 209, 102, .28);
-  color: #e9edf3;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(2,6,23,.55), rgba(2,6,23,.35));
+  border: 1px solid var(--border);
+  color: var(--text);
   box-shadow:
-    0 2px 10px rgba(0,0,0,.35),
-    inset 0 0 0 1px rgba(20, 34, 69, .7);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    0 2px 12px rgba(0,0,0,.25),
+    inset 0 0 0 1px rgba(255,255,255,.03);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
 }
-.step:hover {
+
+.step:hover{
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0,0,0,.45);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.35),
+    inset 0 0 0 1px rgba(255,255,255,.04);
 }
 
-/* Titre d’étape */
-.step strong {
-  color: #ffd166;
+/* Titre étape */
+.step strong{
+  color: var(--text);
   font-weight: 700;
-  text-shadow:
-    0 0 8px rgba(255, 180, 70, .25),
-    1px 1px 2px rgba(0, 0, 0, .8);
-  -webkit-text-stroke: .3px #0b1320;
 }
 
-/* Badges d’état */
-.step::after {
+/* Badge d’état (coin haut droit) */
+.step::after{
   content: "";
   position: absolute;
   top: 8px;
@@ -155,137 +167,183 @@ aside h3,
   font-weight: 800;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.2);
-  letter-spacing: .3px;
+  border: 1px solid rgba(0,0,0,.25);
+  letter-spacing: .25px;
 }
 
-/* Étape en cours */
-.step.pending {
-  background: linear-gradient(180deg, #1c2a52, #132246);
-  border-color: #ffd166;
-  box-shadow: 0 0 0 2px rgba(255, 209, 102, .18) inset, 0 6px 14px rgba(0,0,0,.45);
+/* En cours */
+.step.pending{
+  border-color: rgba(59,130,246,.55);
+  background: linear-gradient(180deg, rgba(59,130,246,.18), rgba(2,6,23,.45));
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.35),
+    0 0 0 2px rgba(59,130,246,.18) inset;
 }
-.step.pending::after {
+.step.pending::after{
   content: "EN COURS";
-  background: #ffd166;
-  color: #0b1320;
+  background: var(--accent);
+  color: #ffffff;
 }
 
-/* Étape validée */
-.step.done {
-  background: linear-gradient(180deg, #123a2b, #0e2f24);
-  border-color: #34d399;
+/* Validée */
+.step.done{
+  border-color: rgba(34,197,94,.55);
+  background: linear-gradient(180deg, rgba(34,197,94,.14), rgba(2,6,23,.45));
 }
-.step.done::after {
+.step.done::after{
   content: "VALIDÉ";
-  background: #34d399;
-  color: #06281f;
+  background: var(--ok);
+  color: #052e16;
 }
 
-/* Étape verrouillée */
-.step.locked {
-  background: linear-gradient(180deg, #1a2133, #121a2a);
-  border-color: #2c3b5c;
-  color: #cbd5e1;
+/* Verrouillée */
+.step.locked{
+  border-color: rgba(148,163,184,.22);
+  background: linear-gradient(180deg, rgba(148,163,184,.05), rgba(2,6,23,.35));
+  color: rgba(229,231,235,.78);
 }
-.step.locked::after {
+.step.locked::after{
   content: "LOCK";
-  background: #334155;
-  color: #e2e8f0;
+  background: rgba(148,163,184,.24);
+  color: rgba(229,231,235,.92);
 }
 
-/* Noms d’équipes sous chaque étape */
-.subteam {
+/* Sous-texte équipe (si utilisé) */
+.subteam{
   margin: 6px 0 0 2px;
   padding-left: 8px;
-  color: #e6b74a;
+  color: rgba(229,231,235,.85);
   font-weight: 600;
-  text-shadow: 0 0 5px rgba(0,0,0,.85);
-  -webkit-text-stroke: .2px #0b1320;
-  border-left: 2px solid rgba(255, 209, 102, .35);
-  opacity: .95;
+  border-left: 2px solid rgba(59,130,246,.35);
+  opacity: .92;
 }
 
-/* === Zone principale === */
-.content {
-  flex: 1;
+/* --------- Content zone --------- */
+.content{ flex: 1; }
+
+/* Timer */
+.timer{ font-weight: 600; margin: 4px 0 8px; }
+#liveTimer{
+  display: block !important;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: rgba(229,231,235,.95);
+  letter-spacing: .35px;
 }
+
+/* Image fade-in */
+.step-photo{ opacity: 0; transition: opacity .25s ease; }
+.step-photo.loaded{ opacity: 1; }
 
 /* Image d’étape */
 #photoArea img,
-#stepImage {
+#stepImage{
+  display: block !important;
   max-width: 100%;
   height: 360px;
   object-fit: cover;
-  border-radius: 10px;
-  display: block;
+  border-radius: 12px;
   margin-bottom: 12px;
-  border: 2px solid #ffb347;
-  box-shadow: 0 0 12px rgba(255, 180, 70, 0.3);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 26px rgba(0,0,0,.4);
 }
 
-/* === Contrôles === */
-.controls {
-  display: flex;
-  gap: 8px;
+/* Légende/indice */
+#stepLegend{
+  margin: 8px 0 0;
+  color: var(--muted);
 }
 
-.controls input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ffd166;
-  background: #0f1724;
-  color: #ffd166;
+/* --------- Controls (register + code) --------- */
+#registerArea{
+  margin-bottom: 10px;
+}
+
+label{ display: inline-block; margin: 0 0 6px; }
+
+/* Inputs */
+input,
+#registerArea input,
+.controls input,
+.admin-bar input[type="password"],
+.admin-bar input[type="text"]{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: rgba(2,6,23,.55);
+  color: var(--text);
   outline: none;
-  text-shadow: 0 0 6px rgba(255, 180, 70, 0.25);
-  -webkit-text-stroke: 0.3px #000;
 }
 
-.controls input:focus {
-  border-color: #ffb347;
-  box-shadow: 0 0 6px rgba(255, 180, 70, 0.6);
+input::placeholder{ color: rgba(163,173,194,.8); }
+
+input:focus{
+  border-color: rgba(59,130,246,.75);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18);
 }
 
-.controls button {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
+/* Buttons */
+button,
+#registerArea button,
+.controls button,
+.admin-bar button{
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(96,165,250,.95));
+  color: #fff;
   cursor: pointer;
-  background: linear-gradient(135deg, #ffb347, #ffd166);
-  color: #0b1320;
-  font-weight: bold;
-  transition: 0.2s ease;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  font-weight: 700;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
 
-.controls button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 209, 102, 0.5);
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(59,130,246,.22);
+  filter: brightness(1.03);
 }
 
-/* === Feedback (valide / erreur) === */
-#feedback {
-  font-weight: bold;
+button:active{ transform: scale(0.98); }
+
+/* Inline controls area used in index.html */
+.controls{ display: flex; gap: 8px; }
+@media (max-width: 560px){
+  .controls{ flex-direction: column; }
+}
+
+/* Feedback */
+#feedback{
+  font-weight: 700;
   margin-top: 10px;
-  font-size: 1.1em;
-  text-shadow:
-    0 0 5px rgba(0, 0, 0, 0.8),
-    0 0 10px rgba(255, 209, 102, 0.3);
-  -webkit-text-stroke: 0.3px #0b1320;
+  font-size: 1.05em;
+}
+.ok{ color: var(--ok); }
+.err{ color: var(--err); }
+
+/* --------- Leaderboard table --------- */
+.leaderboard{
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
-/* === Boutons === */
-button:active {
-  transform: scale(0.97);
+.leaderboard th,
+.leaderboard td{
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(148,163,184,.14);
 }
 
-/* === Éléments masqués === */
-.hidden {
-  display: none;
+.leaderboard th{
+  text-align: left;
+  background: rgba(255,255,255,.03);
+  color: rgba(229,231,235,.9);
+  font-weight: 800;
+  letter-spacing: .2px;
 }
-/* === Animation Chinchin === */
-#cheers-animation {
+
+/* --------- Cheers animation (conservée) --------- */
+#cheers-animation{
   position: fixed;
   top: 40%;
   left: 50%;
@@ -297,49 +355,31 @@ button:active {
   pointer-events: none;
 }
 
-/* ⚠️ Important : invisibles par défaut */
-.beer {
+/* invisibles par défaut */
+.beer{
   width: 120px;
   opacity: 0;
   transform-origin: center;
 }
 
-.beer-left { transform: translateX(-150px) rotate(-20deg); }
-.beer-right { transform: translateX(150px) rotate(20deg); }
+.beer-left{ transform: translateX(-150px) rotate(-20deg); }
+.beer-right{ transform: translateX(150px) rotate(20deg); }
 
-/* Ne s’animent que quand .active est sur le conteneur */
-#cheers-animation.active .beer-left { animation: cheersLeft 1s forwards; }
-#cheers-animation.active .beer-right { animation: cheersRight 1s forwards; }
+#cheers-animation.active .beer-left{ animation: cheersLeft 1s forwards; }
+#cheers-animation.active .beer-right{ animation: cheersRight 1s forwards; }
 
-@keyframes cheersLeft {
-  0% { opacity: 0; transform: translateX(-150px) rotate(-20deg); }
-  40% { opacity: 1; transform: translateX(-40px) rotate(-10deg); }
-  50% { transform: translateX(-20px) rotate(0deg); }
-  70% { transform: translateX(-40px) rotate(-10deg); }
+@keyframes cheersLeft{
+  0%   { opacity: 0; transform: translateX(-150px) rotate(-20deg); }
+  40%  { opacity: 1; transform: translateX(-40px) rotate(-10deg); }
+  50%  { transform: translateX(-20px) rotate(0deg); }
+  70%  { transform: translateX(-40px) rotate(-10deg); }
   100% { opacity: 0; transform: translateX(-150px) rotate(-20deg); }
 }
-@keyframes cheersRight {
-  0% { opacity: 0; transform: translateX(150px) rotate(20deg); }
-  40% { opacity: 1; transform: translateX(40px) rotate(10deg); }
-  50% { transform: translateX(20px) rotate(0deg); }
-  70% { transform: translateX(40px) rotate(10deg); }
+
+@keyframes cheersRight{
+  0%   { opacity: 0; transform: translateX(150px) rotate(20deg); }
+  40%  { opacity: 1; transform: translateX(40px) rotate(10deg); }
+  50%  { transform: translateX(20px) rotate(0deg); }
+  70%  { transform: translateX(40px) rotate(10deg); }
   100% { opacity: 0; transform: translateX(150px) rotate(20deg); }
-}
-/* Forcer l’image d’étape à s’afficher correctement */
-#stepImage {
-  display: block !important;
-  max-width: 100%;
-  height: 360px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 2px solid #ffb347;
-  box-shadow: 0 0 12px rgba(255,180,70,.3);
-}
-#liveTimer {
-  display: block !important;
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: #ffd166;        /* jaune ambeer */
-  margin: 4px 0 8px;
-  letter-spacing: 0.5px;
 }
