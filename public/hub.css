@@ -1,0 +1,300 @@
+/* =========================================================
+   Micro-Event • HUB (neutre)
+   Slides portrait type "téléphone" (ratio 3/4)
+   + panneau code + panneau thèmes évolutif
+   ========================================================= */
+
+:root{
+  --hub-bg0:#070b14;
+  --hub-bg1:#0b1222;
+  --hub-panel:#0f172a;
+
+  --hub-text:#e5e7eb;
+  --hub-muted:#a3adc2;
+
+  --hub-border:rgba(148,163,184,.18);
+  --hub-border2:rgba(148,163,184,.28);
+
+  --hub-accent:#3b82f6;
+  --hub-accent2:#60a5fa;
+
+  --hub-ok:#22c55e;
+  --hub-err:#ef4444;
+
+  --hub-shadow:0 14px 40px rgba(0,0,0,.55);
+  --hub-shadow2:0 10px 26px rgba(0,0,0,.45);
+
+  --hub-radius:14px;
+  --hub-radius2:12px;
+}
+
+/* Page */
+body.hub-page{
+  margin:0;
+  font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--hub-text);
+  background:
+    radial-gradient(1200px 600px at 25% 0%, rgba(96,165,250,.18), transparent 55%),
+    radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,.14), transparent 60%),
+    radial-gradient(circle at top, var(--hub-bg1), var(--hub-bg0));
+}
+
+/* On réutilise .app mais on la "re-skin" pour le Hub */
+.hub-page .app{
+  max-width: 1200px;
+  margin: 26px auto;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(11,18,34,.92));
+  border:1px solid var(--hub-border);
+  border-radius: var(--hub-radius);
+  box-shadow: var(--hub-shadow);
+}
+
+/* Header (réutilise <header>) */
+.hub-page header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border:1px solid var(--hub-border);
+  border-radius: var(--hub-radius2);
+  background: linear-gradient(90deg, rgba(7,11,20,.85), rgba(15,23,42,.85));
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
+}
+
+.hub-page header h1{
+  margin:0;
+  font-size:1.35rem;
+  font-weight:800;
+  letter-spacing:.3px;
+  color: var(--hub-text);
+  text-shadow:none;
+  -webkit-text-stroke: 0;
+}
+
+.hub-page .muted{ color: var(--hub-muted); opacity: .9; }
+
+/* Layout : slide viewer + colonne droite */
+.hub{
+  display:grid;
+  grid-template-columns: 1fr 380px;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 980px){
+  .hub{ grid-template-columns: 1fr; }
+}
+
+/* ===== Viewer slides ===== */
+.hero{
+  position: relative;
+  border-radius: var(--hub-radius2);
+  border:1px solid var(--hub-border);
+  background: rgba(255,255,255,.03);
+  box-shadow: var(--hub-shadow2);
+  padding: 14px;
+  overflow: visible; /* important : on met le frame dedans */
+}
+
+/* Cadre "téléphone" */
+.hero .slide-frame{
+  width: min(420px, 100%);
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;              /* téléphone portrait */
+  border-radius: 16px;
+  border:1px solid var(--hub-border2);
+  background: rgba(2,6,23,.55);
+  overflow:hidden;
+  position: relative;
+  box-shadow: 0 16px 38px rgba(0,0,0,.45);
+}
+
+/* Image slide */
+.hero img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+  opacity:0;
+  transition: opacity .35s ease;
+}
+.hero img.loaded{ opacity:1; }
+
+/* Effet “écran” */
+.hero .slide-frame::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.05),
+    inset 0 0 50px rgba(0,0,0,.25);
+}
+
+/* Overlay devient un panneau sous la slide (plus clair que sur image) */
+.overlay{
+  margin-top: 12px;
+  position: static;
+  inset: auto;
+  background: rgba(2,6,23,.40);
+  border: 1px solid var(--hub-border);
+  border-radius: 12px;
+  padding: 12px 12px;
+  display:flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overlay h2{
+  margin:0;
+  color: var(--hub-text);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.overlay p{
+  margin:0;
+  max-width: 60ch;
+  color: var(--hub-muted);
+}
+
+/* Dots */
+.dots{
+  display:flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.55);
+  opacity: .55;
+  cursor:pointer;
+  transition: opacity .12s ease, background .12s ease, border-color .12s ease, transform .12s ease;
+}
+.dot:hover{ transform: translateY(-1px); opacity: .8; }
+.dot.active{
+  opacity: 1;
+  background: var(--hub-accent);
+  border-color: rgba(59,130,246,.75);
+}
+
+/* ===== Colonne droite ===== */
+.hub-side{
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+}
+
+/* Carte neutre */
+.card{
+  background: linear-gradient(180deg, rgba(16,28,54,.9), rgba(12,20,42,.9));
+  padding: 14px;
+  border-radius: var(--hub-radius2);
+  border: 1px solid var(--hub-border);
+  box-shadow: var(--hub-shadow2);
+}
+
+.card h2{
+  margin: 0 0 10px 0;
+  color: var(--hub-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* Section thèmes (future-proof) */
+.theme-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.theme-card{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  padding: 10px;
+  border-radius: 12px;
+  border:1px solid var(--hub-border);
+  background: rgba(2,6,23,.35);
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.theme-card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(96,165,250,.45);
+  box-shadow: 0 12px 22px rgba(0,0,0,.35);
+}
+
+.theme-thumb{
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  border: 1px solid var(--hub-border2);
+  background: rgba(0,0,0,.25);
+  overflow:hidden;
+  flex: 0 0 auto;
+}
+.theme-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.theme-info{ display:flex; flex-direction:column; gap:2px; }
+.theme-title{ font-weight:800; color: var(--hub-text); }
+.theme-desc{ color: var(--hub-muted); font-size:.92rem; }
+
+.theme-card.active{
+  border-color: rgba(59,130,246,.75);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18) inset;
+}
+
+/* ===== Accès par code ===== */
+.access-row{
+  display:flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.access-row input{
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--hub-border2);
+  background: rgba(2,6,23,.55);
+  color: var(--hub-text);
+  outline: none;
+}
+.access-row input::placeholder{ color: rgba(163,173,194,.8); }
+.access-row input:focus{
+  border-color: rgba(59,130,246,.75);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+}
+
+.access-row button{
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.06);
+  cursor:pointer;
+  background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(96,165,250,.95));
+  color:#fff;
+  font-weight: 800;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.access-row button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(59,130,246,.22);
+  filter: brightness(1.03);
+}
+.access-row button:active{ transform: scale(.98); }
+
+.msg{
+  margin-top: 10px;
+  font-weight: 800;
+}
+.msg.ok{ color: var(--hub-ok); }
+.msg.err{ color: var(--hub-err); }
