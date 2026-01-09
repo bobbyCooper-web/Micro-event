@@ -60,7 +60,7 @@
       "answer": 6,
       "onSuccess": {
         "grant": [{ "type": "fragment", "chapter": "ch1", "value": 6 }],
-        "unlockImages": ["/img/Réussite-gazebo.png"],
+        "unlockImages": ["/img/reussite_gazebo.png"],
         "textSuccess": "Ces 6 piliers représentaient la richesse, la stabilité, l'ordre, la sagesse, la robustesse et la puissance."
       },
       "archiveCard": {
@@ -106,7 +106,7 @@
       "archiveCard": {
         "title": "Origine Docks",
         "thumb": "/img/business-dock.png",
-        "content": "Arrivées, caisses, pontons."
+        "content": "Arrivées par la mer sur 2 pontons."
       }
     },
 
@@ -114,7 +114,7 @@
       "chapter": 2,
       "title": "La logistique un élément clé",
       "imageMain": "/img/ch2_warehouse.jpg",
-      "textIntro": "Les rails permettaient une redistribution efficace…",
+      "textIntro": "L'acces permetait de décharger et charger rapidement, l'infrastructure été pensée pour que cela aille vite",
       "questionPrompt": "Beaucoup de transit, peu de stockage. plusieurs issues possibles.",
       "answerType": "number",
       "answer": 3,
@@ -129,7 +129,7 @@
       "archiveCard": {
         "title": "Origines Fragment 3",
         "thumb": "/img/business-3piliers.png",
-        "content": "Trois portes, redistribution, système."
+        "content": "3 lieux, 3 rôles, 3 business"
       }
     },
 
@@ -137,8 +137,8 @@
       "chapter": 3,
       "title": "La trahison, une ruelle sombre",
       "imageMain": "/img/ch3_alley.jpg",
-      "textIntro": "Ils étaient plusieurs niveaux en dessous de nous…",
-      "questionPrompt": "Plus j'avançais vers eux , plus je descendais.",
+      "textIntro": "Ils étaient plusieurs niveaux en dessous de nous… Plus j'avançais vers eux, plus je descendais.",
+      "questionPrompt": "Je ne me souviens plus combien...",
       "answerType": "number",
       "answer": 3,
       "onSuccess": {
