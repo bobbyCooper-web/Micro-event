@@ -8,247 +8,305 @@
       "id": "carlo-richesse",
       "label": "Carlo-richesse",
       "accessCode": "CARLO-RICHESSE",
-      "route": ["ch0_unicorn", "ch1_kiosk", "ch3_alley", "ch3_parking", "ch3_sum", "ch2_bar", "ch2_docks", "ch2_warehouse", "ch4_trailer", "ch5_lighthouse_gate", "ch5_safe"]
+      "route": [
+        "ch0_unicorn",
+        "ch1_kiosk",
+        "ch3_alley",
+        "ch3_parking",
+        "ch3_sum",
+        "ch2_bar",
+        "ch2_docks",
+        "ch2_warehouse",
+        "ch4_trailer_arrival",
+        "ch4_trailer_exterior",
+        "ch4_trailer_interior",
+        "ch5_lighthouse_gate",
+        "ch5_safe"
+      ]
     },
     {
       "id": "carlo-trahison",
       "label": "Carlo-trahison",
       "accessCode": "CARLO-TRAHISON",
-      "route": ["ch0_unicorn", "ch3_alley", "ch3_parking", "ch3_sum", "ch2_bar", "ch2_docks", "ch2_warehouse", "ch1_kiosk", "ch4_trailer", "ch5_lighthouse_gate", "ch5_safe"]
+      "route": [
+        "ch0_unicorn",
+        "ch3_alley",
+        "ch3_parking",
+        "ch3_sum",
+        "ch2_bar",
+        "ch2_docks",
+        "ch2_warehouse",
+        "ch1_kiosk",
+        "ch4_trailer_arrival",
+        "ch4_trailer_exterior",
+        "ch4_trailer_interior",
+        "ch5_lighthouse_gate",
+        "ch5_safe"
+      ]
     },
     {
       "id": "carlo-business",
       "label": "Carlo-business",
       "accessCode": "CARLO-BUSINESS",
-      "route": ["ch0_unicorn", "ch2_bar", "ch2_docks", "ch2_warehouse", "ch1_kiosk", "ch3_alley", "ch3_parking", "ch3_sum", "ch4_trailer", "ch5_lighthouse_gate", "ch5_safe"]
+      "route": [
+        "ch0_unicorn",
+        "ch2_bar",
+        "ch2_docks",
+        "ch2_warehouse",
+        "ch1_kiosk",
+        "ch3_alley",
+        "ch3_parking",
+        "ch3_sum",
+        "ch4_trailer_arrival",
+        "ch4_trailer_exterior",
+        "ch4_trailer_interior",
+        "ch5_lighthouse_gate",
+        "ch5_safe"
+      ]
     }
   ],
   "chapters": {
-    "ch1": { "title": "L’Argent important", "fragmentValue": 6 },
-    "ch2": { "title": "Les Origines", "fragmentValue": 3 },
-    "ch3": { "title": "La Trahison", "fragmentValue": 6 },
-    "ch4": { "title": "La Fuite", "fragmentValue": 9 },
-    "ch5": { "title": "Le Phare", "fragmentValue": null }
+    "ch1": {
+      "title": "L’Argent important"
+    },
+    "ch2": {
+      "title": "Les Origines"
+    },
+    "ch3": {
+      "title": "La Trahison"
+    },
+    "ch4": {
+      "title": "La Fuite"
+    },
+    "ch5": {
+      "title": "Le Phare"
+    }
   },
   "steps": {
     "ch0_unicorn": {
       "chapter": 0,
       "title": "Prologue – L’exposition",
-      "imageMain": "/img/anniversaire.png",
+      "imageMain": "/carlo/img/steps/step_anniversaire.png",
       "textIntro": "Le Don était là, au centre de l’attention, sans peur, comme si il était au dessus de tout.",
-      "answerType": "none",
-      "answer": null,
+      "questionPrompt": null,
       "onSuccess": {
-        "grant": [],
-        "unlockImages": [],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_intro.png"
+        ],
         "textSuccess": "Début du chrono."
       },
       "archiveCard": {
         "title": "La fête",
-        "thumb": "/img/anniversaire.png",
+        "thumb": "/carlo/img/unlock/unlock_intro.png",
         "content": "Don Carlo, tellement sur de son pouvoir et de sa richesse. Fête les 18 ans de son fils aux yeux de tous comme si il était intouchable."
       }
     },
-
     "ch1_kiosk": {
       "chapter": 1,
       "title": "Le Don a son appogé",
-      "imageMain": "/img/villa_rouge.jpg",
+      "imageMain": "/carlo/img/steps/step_villa.png",
       "textIntro": "Depuis sa villa, il observait la ville…",
       "questionPrompt": "Un promontoire abrité par de solides appuis !",
-      "answerType": "number",
-      "answer": 6,
       "onSuccess": {
-        "grant": [{ "type": "fragment", "chapter": "ch1", "value": 6 }],
-        "unlockImages": ["/img/reussite_gazebo.png"],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_reussite.png"
+        ],
         "textSuccess": "Ces 6 piliers représentaient la richesse, la stabilité, l'ordre, la sagesse, la robustesse et la puissance."
       },
       "archiveCard": {
         "title": "Apogée ! 6 piliers",
-        "thumb": "/img/Réussite-gazebo.png",
+        "thumb": "/carlo/img/unlock/unlock_reussite.png",
         "content": "Il aimait donner une valeure aux choses, aux lieux."
       }
     },
-
     "ch2_bar": {
       "chapter": 2,
       "title": "Un bar, premier QG",
-      "imageMain": "/img/ch2_bar.jpg",
+      "imageMain": "/carlo/img/steps/step_business_bar.png",
       "textIntro": "La façade était propre. Les affaires se faisaient à l'arrière",
       "questionPrompt": "Un acces officiel seulement ?",
-      "answerType": "number",
-      "answer": 1,
       "onSuccess": {
-        "grant": [{ "type": "clue", "key": "ch2_marker_bar", "value": 1 }],
-        "unlockImages": ["/img/business-bar.png"],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_buisness_bar.png"
+        ],
         "textSuccess": "Le bar n’était qu’une façade, tout ce passait par la porte arrière. Maintenant il fallait importer des marchandises à écouler."
       },
       "archiveCard": {
         "title": "Origine Bar",
-        "thumb": "/img/business-bar.png",
+        "thumb": "/carlo/img/unlock/unlock_buisness_bar.png",
         "content": "Porte arrière, façade, couverture."
       }
     },
-
     "ch2_docks": {
       "chapter": 2,
       "title": "L'approvisionnement aux docks",
-      "imageMain": "/img/ch2_docks.png",
+      "imageMain": "/carlo/img/steps/step_business_dock.png",
       "textIntro": "Les cargaisons arrivaient de nuit… Des acces restreints depuis la mer. ",
       "questionPrompt": "Peu de possibilité de déchargement",
-      "answerType": "number",
-      "answer": 2,
       "onSuccess": {
-        "grant": [{ "type": "clue", "key": "ch2_marker_docks", "value": 2 }],
-        "unlockImages": ["/img/business-dock.png"],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_buisness_dock.png"
+        ],
         "textSuccess": "Un point d'arrivée des marchandises, la deuxieme partie d'un socle."
       },
       "archiveCard": {
         "title": "Origine Docks",
-        "thumb": "/img/business-dock.png",
+        "thumb": "/carlo/img/unlock/unlock_buisness_dock.png",
         "content": "Arrivées par la mer sur 2 pontons."
       }
     },
-
     "ch2_warehouse": {
       "chapter": 2,
       "title": "La logistique un élément clé",
-      "imageMain": "/img/ch2_warehouse.jpg",
+      "imageMain": "/carlo/img/steps/step_business_entrepot.png",
       "textIntro": "L'acces permetait de décharger et charger rapidement, l'infrastructure été pensée pour que cela aille vite",
       "questionPrompt": "Beaucoup de transit, peu de stockage. plusieurs issues possibles.",
-      "answerType": "number",
-      "answer": 3,
       "onSuccess": {
-        "grant": [
-          { "type": "clue", "key": "ch2_marker_warehouse", "value": 3 },
-          { "type": "fragment", "chapter": "ch2", "value": 3 }
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_buisness_warehouse.png",
+          "/carlo/img/unlock/unlock_buisness_3.png"
         ],
-        "unlockImages": ["/img/business-entrepot.png"],
         "textSuccess": "Un business bien établit, 3 lieux, 3 Mission."
       },
       "archiveCard": {
         "title": "Origines Fragment 3",
-        "thumb": "/img/business-3piliers.png",
+        "thumb": "/carlo/img/unlock/unlock_buisness_3.png",
         "content": "3 lieux, 3 rôles, 3 business"
       }
     },
-
     "ch3_alley": {
       "chapter": 3,
       "title": "La trahison, une ruelle sombre",
-      "imageMain": "/img/ch3_alley.jpg",
+      "imageMain": "/carlo/img/steps/step_trahison_ruelle.png",
       "textIntro": "Ils étaient plusieurs niveaux en dessous de nous… Plus j'avançais vers eux, plus je descendais.",
       "questionPrompt": "Je ne me souviens plus combien...",
-      "answerType": "number",
-      "answer": 3,
       "onSuccess": {
-        "grant": [{ "type": "clue", "key": "ch3_alley_value", "value": 3 }],
-        "unlockImages": ["/img/trahison-ruelle.png"],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_trahison_ruelle.png"
+        ],
         "textSuccess": "Nous avons été piégé, pourquoi ? Par qui ?"
       },
       "archiveCard": {
         "title": "Ruelle (3)",
-        "thumb": "/img/trahison-ruelle.png",
+        "thumb": "/carlo/img/unlock/unlock_trahison_ruelle.png",
         "content": "Trois descentes, trois palier.."
       }
     },
-
     "ch3_parking": {
       "chapter": 3,
       "title": "La trahison, l'origine",
-      "imageMain": "/img/ch3_parking.jpg",
+      "imageMain": "/carlo/img/steps/step_trahison_parking.png",
       "textIntro": "Plus on montait, plus on se sentait en sécurité On ne comptait plus les étages tant que les regards disparaissaient…",
       "questionPrompt": "La nuit était claire la haut.",
-      "answerType": "number",
-      "answer": 3,
       "onSuccess": {
-        "grant": [{ "type": "clue", "key": "ch3_parking_value", "value": 3 }],
-        "unlockImages": ["/img/trahison-parking.png"],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_trahison_parking.png"
+        ],
         "textSuccess": "On s’était fait repérer, le client était tombé."
       },
       "archiveCard": {
         "title": "Parking (3)",
-        "thumb": "/img/trahison-parking.png",
+        "thumb": "/carlo/img/unlock/unlock_trahison_parking.png",
         "content": "Trois étages, à l’abri des regards."
       }
     },
-
     "ch3_sum": {
       "chapter": 3,
       "title": "L’accumulation",
-      "imageMain": "/img/ch3_sum.jpg",
+      "imageMain": "/carlo/img/unlock/unlock_trahison_somme.png",
       "textIntro": "Ce n’était pas un incident isolé…",
       "questionPrompt": "L'accumulation de ces évenments m'a marqué.",
-      "answerType": "number",
-      "answer": 6,
       "onSuccess": {
-        "grant": [{ "type": "fragment", "chapter": "ch3", "value": 6 }],
-        "unlockImages": ["/img/ch3_sum_success.jpg"],
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_trahison_somme.png"
+        ],
         "textSuccess": "Il nous a fallu des heures pour comprendre la portée de la trahison."
       },
       "archiveCard": {
         "title": "Trahison Fragment 6",
-        "thumb": "/img/trahison-somme.png",
+        "thumb": "/carlo/img/unlock/unlock_trahison_somme.png",
         "content": "La somme des descentes a mené à la trahison."
       }
     },
-
-    "ch4_trailer": {
+    "ch4_trailer_arrival": {
       "chapter": 4,
-      "title": "La caravane oubliée",
-      "imageMain": "/img/ch4_trailer_ext.jpg",
-      "textIntro": "Mon dernier refuge avant de quitter la ville…",
-      "questionPrompt": "un lieu, une indication. ",
-      "answerType": "number",
-      "answer": 9,
+      "title": "La caravane – Repérer la planque",
+      "imageMain": "/carlo/img/steps/step_caravane_exterieur.png",
+      "textIntro": "La planque n’était pas faite pour vivre. Elle était faite pour disparaître.",
+      "questionPrompt": "Présentez-vous sur place et contactez l’agent fédéral pour confirmation.",
       "onSuccess": {
-        "grant": [{ "type": "fragment", "chapter": "ch4", "value": 9 }],
-        "unlockImages": ["/img/ch4_desk.jpg", "/img/ch4_map.jpg"],
-        "textSuccess": "Chapitre 4 complété – Fragment obtenu : 9."
+        "unlockImages": [],
+        "textSuccess": "Planque confirmée. Cherchez ce qui a été laissé à l’extérieur."
+      },
+      "archiveCard": {
+        "title": "Caravane – repérée",
+        "thumb": "/carlo/img/steps/step_caravane_exterieur.png",
+        "content": "Planque isolée, achetée discrètement. Personne ne devait la connaître."
+      }
+    },
+    "ch4_trailer_exterior": {
+      "chapter": 4,
+      "title": "La caravane – Le détail à l’extérieur",
+      "imageMain": "/carlo/img/steps/step_caravane_exterieur.png",
+      "textIntro": "Le Don ne disait jamais rien à la légère. Chaque mot prononcé avait un sens.",
+      "questionPrompt": "Comptez l’élément extérieur (à définir). Si besoin, contactez l’agent fédéral.",
+      "onSuccess": {
+        "unlockImages": [],
+        "textSuccess": "Vous avez la confirmation. Vous pouvez maintenant fouiller l’intérieur."
+      },
+      "archiveCard": {
+        "title": "Caravane – extérieur",
+        "thumb": "/carlo/img/steps/step_caravane_exterieur.png",
+        "content": "Un détail a été noté. Ce n’était pas un hasard."
+      }
+    },
+    "ch4_trailer_interior": {
+      "chapter": 4,
+      "title": "La caravane – À l’intérieur",
+      "imageMain": "/carlo/img/steps/step_caravane_interieur.png",
+      "textIntro": "Des papiers, des plans, des faux indices… et une route griffonnée vers la côte.",
+      "questionPrompt": "Quel chiffre est écrit à la main sur la carte ?",
+      "onSuccess": {
+        "unlockImages": [
+          "/carlo/img/steps/step_caravane_interieur.png"
+        ],
+        "textSuccess": "Le chiffre n’expliquait rien. Il servait à se rappeler où tout devait finir."
       },
       "archiveCard": {
         "title": "Fuite – Le 9 manuscrit",
-        "thumb": "/img/thumbs/ch4.jpg",
-        "content": "Carte Est, phare et ponton."
+        "thumb": "/carlo/img/steps/step_caravane_interieur.png",
+        "content": "Carte Est, faux indices, phare et ponton. Le 9 manuscrit guide la fin du périple."
       }
     },
-
     "ch5_lighthouse_gate": {
       "chapter": 5,
       "title": "Chapitre 5 – Accès au phare",
-      "imageMain": "/img/ch5_lighthouse.jpg",
+      "imageMain": "/carlo/img/steps/step_phare.png",
       "textIntro": "Il a fuit ? A-t-il laissé des choses derriere lui ? Il faut retrouver ce lieu.",
-      "answerType": "manualGate",
-      "answer": null,
+      "questionPrompt": "Présentez-vous au maître du jeu pour recevoir la clé du phare.",
       "onSuccess": {
-        "grant": [{ "type": "flag", "key": "final_gate_opened", "value": true }],
         "unlockImages": [],
         "textSuccess": "Il est l'heure de savoir ce qu'il a bien pu laisser derrière lui."
       },
       "archiveCard": {
         "title": "Phare – Accès",
-        "thumb": "/img/thumbs/ch5_gate.jpg",
+        "thumb": "/carlo/img/steps/step_phare.png",
         "content": "Un phare dans la nuit."
       }
     },
-
     "ch5_safe": {
       "chapter": 5,
       "title": "Le coffre",
-      "imageMain": "/img/ch5_safe.jpg",
+      "imageMain": "/carlo/img/steps/step_phare.png",
       "textIntro": "A l'intérieur du phare vous trouvez un coffre, ce genre de méchanisme nécessite 4 chiffre. Vous ne trouvez aucune note aux alentour. Qu'es qu'il a bien pu utiliser ?",
       "questionPrompt": "Code du coffre (4 chiffres)",
-      "answerType": "code4",
-      "answer": "3669",
-      "requires": [{ "type": "flag", "key": "final_gate_opened", "value": true }],
       "onSuccess": {
-        "grant": [{ "type": "flag", "key": "game_completed", "value": true }],
-        "unlockImages": ["/img/ch5_letter.jpg"],
+        "unlockImages": [],
         "textSuccess": "Clic !! Le coffre s'ouvre."
       },
       "archiveCard": {
         "title": "Coffre – Ouvert",
-        "thumb": "/img/thumbs/ch5_safe.jpg",
+        "thumb": "/carlo/img/steps/step_phare.png",
         "content": "Le coffre est vide mise a part une lettre."
       }
     }

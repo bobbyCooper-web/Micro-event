@@ -36,8 +36,6 @@ const accessCodesPathRoot = path.join(__dirname, "access-codes.json");
 
 let accessCodesFile = null;
 let accessCodes = [];
-let isAccessing = false;
-
 
 function loadAccessCodes() {
   accessCodesFile = resolveFile(accessCodesPathPublic, accessCodesPathRoot);
@@ -85,8 +83,6 @@ app.post("/api/access", (req, res) => {
 // =======================
 // STEPS (Rally)
 // =======================
-// On cherche steps.json dans plusieurs emplacements possibles,
-// mais ta structure recommandée est: public/rallyphoto/steps.json
 const stepsPathRally = path.join(publicDir, "rallyphoto", "steps.json");
 const stepsPathPublic = path.join(publicDir, "steps.json");
 const stepsPathRoot = path.join(__dirname, "steps.json");
@@ -161,7 +157,7 @@ function buildRoute(allSteps) {
 }
 
 // =======================
-// Mémoire équipes (en RAM)
+// Mémoire équipes Rally (en RAM)
 // =======================
 let teams = [];
 
@@ -181,7 +177,6 @@ function getOrCreateTeam(name) {
     };
     teams.push(team);
   } else {
-    // robustesse
     if (!Array.isArray(team.routeIds) || !Number.isFinite(team.routeIndex)) {
       const route = buildRoute(steps);
       team.routeIds = route;
@@ -320,7 +315,7 @@ app.get("/hint/:stepId", (req, res) => {
 });
 
 // =======================
-// Leaderboard
+// Leaderboard (Rally)
 // =======================
 function computeLeaderboard() {
   const now = new Date();
@@ -350,7 +345,7 @@ function computeLeaderboard() {
 app.get("/leaderboard", (req, res) => res.json({ ok: true, leaderboard: computeLeaderboard() }));
 
 // =======================
-// Admin
+// Admin (clé)
 // =======================
 const ADMIN_KEY = process.env.ADMIN_KEY || null;
 
@@ -361,6 +356,9 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// =======================
+// Admin Rally (existant)
+// =======================
 app.get("/api/admin/overview", requireAdmin, (req, res) => {
   const teamsWithCodes = teams.map((t) => {
     const nextId = t.routeIds?.[t.routeIndex];
@@ -439,11 +437,293 @@ app.post("/api/admin/reset-team", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// =====================================================================
+// CARLO GAME (SECURE) — public config in /public/carlo, private in /private/carlo
+// =====================================================================
+const carloPublicPath = path.join(publicDir, "carlo", "gamecarlo.public.json");
+const carloPrivatePath = path.join(__dirname, "private", "carlo", "gamecarlo.private.json");
+
+let carloPublic = null;
+let carloPrivate = null;
+
+function loadCarloConfigs() {
+  try {
+    carloPublic = JSON.parse(fs.readFileSync(carloPublicPath, "utf-8"));
+    console.log("✅ Carlo public chargé:", path.relative(__dirname, carloPublicPath));
+  } catch (e) {
+    console.warn("⚠️ Impossible de charger carlo public:", e.message);
+    carloPublic = null;
+  }
+
+  try {
+    carloPrivate = JSON.parse(fs.readFileSync(carloPrivatePath, "utf-8"));
+    console.log("✅ Carlo private chargé:", path.relative(__dirname, carloPrivatePath));
+  } catch (e) {
+    console.warn("⚠️ Impossible de charger carlo private:", e.message);
+    carloPrivate = null;
+  }
+}
+loadCarloConfigs();
+
+// Hot reload en dev (facultatif mais utile)
+fs.watchFile(carloPublicPath, { interval: 1000 }, () => {
+  console.log("🔄 carlo public modifié → rechargement…");
+  loadCarloConfigs();
+});
+fs.watchFile(carloPrivatePath, { interval: 1000 }, () => {
+  console.log("🔄 carlo private modifié → rechargement…");
+  loadCarloConfigs();
+});
+
+// RAM state Carlo
+const carloStates = {}; // teamId -> state
+
+function initCarloTeam(teamId) {
+  if (!carloStates[teamId]) {
+    carloStates[teamId] = {
+      teamId,
+      routeIndex: 0,
+      validatedSteps: [],
+      fragments: {},
+      flags: {},
+      wrongAttempts: 0,
+      startAt: null,
+      finishAt: null,
+      durationMs: null,
+      history: []
+    };
+  }
+  return carloStates[teamId];
+}
+
+function getCarloTeam(teamId) {
+  if (!carloPublic) return null;
+  return carloPublic.teams?.find(t => t.id === teamId) || null;
+}
+
+function getCurrentCarloStepId(teamId) {
+  const team = getCarloTeam(teamId);
+  const st = carloStates[teamId];
+  if (!team || !st) return null;
+  return team.route?.[st.routeIndex] || null;
+}
+
+function applyCarloGrants(state, grants = []) {
+  for (const g of grants) {
+    if (!g || !g.type) continue;
+    if (g.type === "fragment") {
+      state.fragments[g.chapter] = g.value;
+    } else if (g.type === "flag") {
+      state.flags[g.key] = g.value;
+    }
+  }
+}
+
+// ---- Carlo: enter (code équipe)
+app.post("/api/carlo/enter", (req, res) => {
+  if (!carloPublic) return res.status(500).json({ ok: false, error: "Config carlo public manquante." });
+  const code = String(req.body?.code || "").trim();
+  if (!code) return res.status(400).json({ ok: false, error: "Code requis." });
+
+  const team = carloPublic.teams.find(t => String(t.accessCode || "").trim().toLowerCase() === code.toLowerCase());
+  if (!team) return res.status(401).json({ ok: false, error: "Code invalide." });
+
+  initCarloTeam(team.id);
+  return res.json({ ok: true, teamId: team.id, label: team.label || team.id });
+});
+
+// ---- Carlo: state (ce que le joueur peut voir)
+app.get("/api/carlo/state/:teamId", (req, res) => {
+  if (!carloPublic) return res.status(500).json({ ok: false, error: "Config carlo public manquante." });
+  const teamId = String(req.params.teamId || "").trim();
+  const team = getCarloTeam(teamId);
+  const state = carloStates[teamId];
+  if (!team || !state) return res.status(404).json({ ok: false, error: "Équipe inconnue." });
+
+  const stepId = getCurrentCarloStepId(teamId);
+  const step = stepId ? carloPublic.steps?.[stepId] : null;
+
+  // archive/frise: on renvoie les cards validées (public only)
+  const archive = state.validatedSteps
+    .map(id => carloPublic.steps?.[id]?.archiveCard ? { stepId: id, ...carloPublic.steps[id].archiveCard } : null)
+    .filter(Boolean);
+
+  return res.json({
+    ok: true,
+    teamId,
+    label: team.label || team.id,
+    stepId,
+    step,
+    archive,
+    routeIndex: state.routeIndex,
+    routeTotal: team.route?.length || 0,
+    flags: state.flags
+  });
+});
+
+// ---- Carlo: submit (validation sécurisée via private)
+app.post("/api/carlo/submit", (req, res) => {
+  if (!carloPublic) return res.status(500).json({ ok: false, error: "Config carlo public manquante." });
+  if (!carloPrivate) return res.status(500).json({ ok: false, error: "Config carlo private manquante." });
+
+  const teamId = String(req.body?.teamId || "").trim();
+  const inputRaw = req.body?.input;
+
+  const team = getCarloTeam(teamId);
+  const state = carloStates[teamId];
+  if (!team || !state) return res.status(404).json({ ok: false, error: "Équipe inconnue." });
+
+  const stepId = getCurrentCarloStepId(teamId);
+  if (!stepId) return res.status(400).json({ ok: false, error: "Aucune étape en cours." });
+
+  // Vérifie que step existe côté public
+  const stepPublic = carloPublic.steps?.[stepId];
+  if (!stepPublic) return res.status(500).json({ ok: false, error: "Étape public introuvable." });
+
+  // Règles privées
+  const rule = carloPrivate.steps?.[stepId] || null;
+  if (!rule) {
+    // Pas de règle privée => on considère validé (rare, mais pratique pour des écrans purement narratifs)
+    if (!state.startAt) state.startAt = new Date().toISOString();
+    state.validatedSteps.push(stepId);
+    state.routeIndex += 1;
+    state.history.push({ stepId, input: null, ok: true, at: Date.now() });
+    return res.json({ ok: true, message: "OK" });
+  }
+
+  // Gestion requires (flags)
+  if (Array.isArray(rule.requires)) {
+    for (const r of rule.requires) {
+      if (r?.type === "flag") {
+        if (state.flags?.[r.key] !== r.value) {
+          return res.json({ ok: false, message: "Accès verrouillé." });
+        }
+      }
+    }
+  }
+
+  const input = (inputRaw == null) ? "" : String(inputRaw).trim();
+
+  let isValid = false;
+
+  switch (rule.answerType) {
+    case "none":
+      isValid = true;
+      break;
+    case "number":
+    case "zip":
+      isValid = String(rule.answer) === input;
+      break;
+    case "code4":
+      isValid = String(rule.answer) === input;
+      break;
+    case "manualGate":
+      // Validation manuelle: on attend un flag défini dans rule.manualFlag
+      if (!rule.manualFlag) return res.status(500).json({ ok: false, error: "manualFlag manquant en private." });
+      isValid = state.flags?.[rule.manualFlag] === true;
+      break;
+    default:
+      return res.status(500).json({ ok: false, error: `answerType inconnu: ${rule.answerType}` });
+  }
+
+  if (!isValid) {
+    state.wrongAttempts += 1;
+    state.history.push({ stepId, input, ok: false, at: Date.now() });
+    return res.json({ ok: false, message: "Incorrect" });
+  }
+
+  // Succès
+  if (!state.startAt) state.startAt = new Date().toISOString();
+
+  applyCarloGrants(state, rule.grants || []);
+
+  state.validatedSteps.push(stepId);
+  state.routeIndex += 1;
+  state.history.push({ stepId, input, ok: true, at: Date.now() });
+
+  // Fin ?
+  const finished = state.routeIndex >= (team.route?.length || 0);
+  if (finished && !state.finishAt) {
+    state.finishAt = new Date().toISOString();
+    state.durationMs = state.startAt ? (new Date(state.finishAt) - new Date(state.startAt)) : null;
+  }
+
+  return res.json({ ok: true, message: "OK", finished });
+});
+
+// ---- Carlo: Admin overview (sans réponses)
+app.get("/api/admin/carlo/overview", requireAdmin, (req, res) => {
+  if (!carloPublic) return res.status(500).json({ ok: false, error: "Config carlo public manquante." });
+
+  const out = (carloPublic.teams || []).map(t => {
+    const st = carloStates[t.id] || null;
+    const routeTotal = t.route?.length || 0;
+
+    if (!st) {
+      return {
+        teamId: t.id,
+        label: t.label || t.id,
+        status: "not_started",
+        routeIndex: 0,
+        routeTotal,
+        stepId: t.route?.[0] || null,
+        stepTitle: t.route?.[0] ? (carloPublic.steps?.[t.route[0]]?.title || null) : null,
+        timing: null,
+        fragments: {},
+        flags: {}
+      };
+    }
+
+    const stepId = t.route?.[st.routeIndex] || null;
+    const stepTitle = stepId ? (carloPublic.steps?.[stepId]?.title || null) : null;
+
+    return {
+      teamId: t.id,
+      label: t.label || t.id,
+      status: st.finishAt ? "finished" : "running",
+      routeIndex: st.routeIndex,
+      routeTotal,
+      stepId,
+      stepTitle,
+      timing: {
+        started: !!st.startAt,
+        finished: !!st.finishAt,
+        startAt: st.startAt,
+        finishAt: st.finishAt,
+        durationMs: st.durationMs
+      },
+      wrongAttempts: st.wrongAttempts || 0,
+      fragments: st.fragments || {},
+      flags: st.flags || {}
+    };
+  });
+
+  return res.json({ ok: true, teams: out });
+});
+
+// ---- Carlo: Admin set flag (valider caravane/phare etc.)
+app.post("/api/admin/carlo/flag", requireAdmin, (req, res) => {
+  const { teamId, flag, value } = req.body || {};
+  const tid = String(teamId || "").trim();
+  const key = String(flag || "").trim();
+  const val = (value === undefined) ? true : value;
+
+  if (!tid || !key) return res.status(400).json({ ok: false, error: "teamId et flag requis" });
+
+  const team = getCarloTeam(tid);
+  if (!team) return res.status(404).json({ ok: false, error: "Équipe inconnue" });
+
+  const st = initCarloTeam(tid);
+  st.flags[key] = val;
+
+  return res.json({ ok: true });
+});
+
 // =======================
 // Pages
 // =======================
 app.get("/admin", (req, res) => {
-  // ton admin est dans public/rallyphoto/admin.html
+  // ton admin rally est dans public/rallyphoto/admin.html
   res.sendFile(path.join(publicDir, "rallyphoto", "admin.html"));
 });
 
