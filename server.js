@@ -582,6 +582,14 @@ app.post("/api/carlo/submit", (req, res) => {
   // Vérifie que step existe côté public
   const stepPublic = carloPublic.steps?.[stepId];
   if (!stepPublic) return res.status(500).json({ ok: false, error: "Étape public introuvable." });
+  // Prépare la récompense (révélée côté client uniquement après validation)
+const reveal = {
+  stepId,
+  title: stepPublic?.title || "Étape validée",
+  textSuccess: stepPublic?.onSuccess?.textSuccess || "",
+  unlockImages: Array.isArray(stepPublic?.onSuccess?.unlockImages) ? stepPublic.onSuccess.unlockImages : [],
+  archiveCard: stepPublic?.archiveCard || null
+};
 
   // Règles privées
   const rule = carloPrivate.steps?.[stepId] || null;
@@ -644,6 +652,7 @@ app.post("/api/carlo/submit", (req, res) => {
   state.routeIndex += 1;
   state.history.push({ stepId, input, ok: true, at: Date.now() });
 
+  
   // Fin ?
   const finished = state.routeIndex >= (team.route?.length || 0);
   if (finished && !state.finishAt) {
@@ -651,7 +660,13 @@ app.post("/api/carlo/submit", (req, res) => {
     state.durationMs = state.startAt ? (new Date(state.finishAt) - new Date(state.startAt)) : null;
   }
 
-  return res.json({ ok: true, message: "OK", finished });
+  return res.json({
+  ok: true,
+  message: "OK",
+  finished,
+  reveal
+});
+
 });
 
 // ---- Carlo: Admin overview (sans réponses)

@@ -18,6 +18,31 @@
   const refreshBtn = qs("refreshBtn");
   const changeTeamBtn = qs("changeTeamBtn");
 
+  function hideReveal() {
+  unlockedWrapEl.classList.add("hidden");
+  unlockedGridEl.innerHTML = "";
+  if (revealTitleEl) revealTitleEl.textContent = "Dossier débloqué";
+  if (revealTextEl) revealTextEl.textContent = "";
+}
+
+function showReveal(reveal) {
+  // reveal = { title, textSuccess, unlockImages[] }
+  if (!reveal) return;
+
+  if (revealTitleEl) revealTitleEl.textContent = reveal.title || "Dossier débloqué";
+  if (revealTextEl) revealTextEl.textContent = reveal.textSuccess || "";
+
+  const imgs = Array.isArray(reveal.unlockImages) ? reveal.unlockImages : [];
+  unlockedGridEl.innerHTML = imgs.map((src) => {
+    const s = toAbs(src);
+    return `<a href="${s}" target="_blank" class="thumbLink">
+              <img class="thumbImg" src="${s}" alt="" />
+            </a>`;
+  }).join("");
+
+  unlockedWrapEl.classList.remove("hidden");
+}
+
   function setFeedback(msg, isErr = false) {
     feedbackEl.textContent = msg || "";
     feedbackEl.className = isErr ? "err" : "muted";
@@ -101,6 +126,9 @@ if (!canShow) {
   }
 
   function render(state) {
+    // À chaque chargement d'une nouvelle étape, on cache la révélation précédente
+hideReveal();
+
     if (!state?.ok) {
       setFeedback(state?.error || "Impossible de charger l’état.", true);
       return;
@@ -168,9 +196,47 @@ if (!canShow) {
         return;
       }
 
-      setFeedback("✅ Validé.");
-      const st = await fetchState(teamId);
-      render(st);
+      async function onSubmit() {
+  const teamId = getTeamIdFromUrl();
+  if (!teamId) return;
+
+  submitBtnEl.disabled = true;
+  const input = answerInputEl.value.trim();
+
+  try {
+    const r = await submitAnswer(teamId, input);
+    if (!r?.ok) {
+      setFeedback(r?.message || "Incorrect.", true);
+      return;
+    }
+
+    setFeedback("✅ Validé.");
+
+    // 1) Si le serveur renvoie une révélation, on l’affiche
+    if (r.reveal) {
+      showReveal(r.reveal);
+
+      // 2) On attend que l’équipe clique "Continuer" pour passer à l’étape suivante
+      continueBtnEl.onclick = async () => {
+        hideReveal();
+        const st = await fetchState(teamId);
+        render(st);
+      };
+
+      return; // IMPORTANT : on ne recharge pas l’état tout de suite
+    }
+
+    // Fallback si pas de reveal
+    const st = await fetchState(teamId);
+    render(st);
+
+  } catch {
+    setFeedback("Erreur réseau.", true);
+  } finally {
+    submitBtnEl.disabled = false;
+  }
+}
+
     } catch {
       setFeedback("Erreur réseau.", true);
     } finally {
