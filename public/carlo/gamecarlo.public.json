@@ -163,15 +163,32 @@
       "questionPrompt": "Beaucoup de transit, peu de stockage. plusieurs issues possibles.",
       "onSuccess": {
         "unlockImages": [
-          "/carlo/img/unlock/unlock_buisness_warehouse.png",
-          "/carlo/img/unlock/unlock_buisness_3.png"
+          "/carlo/img/unlock/unlock_buisness_warehouse.png"
+        ],
+        "textSuccess": "La logistique la clé de voute des fondations de mon business."
+      },
+      "archiveCard": {
+        "title": "Origines warehouse",
+        "thumb": "/carlo/img/unlock/unlock_buisness_warehouse.png",
+        "content": "Proche du port, des rails, des routes, un entrepot parfait"
+      }
+    },
+    "ch2_key": {
+      "chapter" :2,
+      "title": "La clef des débuts du Don Carlo",
+      "imageMain":"/carlo/img/unlock/unlock_buisness_3.png",
+      "textIntro": "Différents lieux, mais une même mission, établir des bases solide a mon business.",
+      "questionPrompt": "Une organisation bien ficellé.",
+      "onSuccess": {
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_buisness_key.png"
         ],
         "textSuccess": "Un business bien établit, 3 lieux, 3 Mission."
       },
       "archiveCard": {
         "title": "Origines Fragment 3",
-        "thumb": "/carlo/img/unlock/unlock_buisness_3.png",
-        "content": "3 lieux, 3 rôles, 3 business"
+        "thumb": "/carlo/img/unlock/unlock_buisness_key.png",
+        "content": "3 lieux, 3 fonctions, 3 éléments"
       }
     },
     "ch3_alley": {
