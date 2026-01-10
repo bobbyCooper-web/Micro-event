@@ -548,17 +548,20 @@ app.get("/api/carlo/state/:teamId", (req, res) => {
     .map(id => carloPublic.steps?.[id]?.archiveCard ? { stepId: id, ...carloPublic.steps[id].archiveCard } : null)
     .filter(Boolean);
 
+    const isCurrentValidated = stepId ? state.validatedSteps.includes(stepId) : false;
+
   return res.json({
-    ok: true,
-    teamId,
-    label: team.label || team.id,
-    stepId,
-    step,
-    archive,
-    routeIndex: state.routeIndex,
-    routeTotal: team.route?.length || 0,
-    flags: state.flags
-  });
+  ok: true,
+  teamId,
+  label: team.label || team.id,
+  stepId,
+  step,
+  archive,
+  routeIndex: state.routeIndex,
+  routeTotal: team.route?.length || 0,
+  flags: state.flags,
+  isCurrentStepAlreadyValidated: isCurrentValidated
+});
 });
 
 // ---- Carlo: submit (validation sécurisée via private)

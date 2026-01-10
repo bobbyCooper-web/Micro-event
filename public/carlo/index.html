@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Le Périple du Don Carlo – Accès</title>
+  <link rel="stylesheet" href="/carlo/carlo.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <h1>Le Périple du Don Carlo</h1>
+      <p class="muted">
+        Dossier fédéral • Accès restreint
+      </p>
+    </header>
+
+    <main class="card">
+      <h2>Accéder au dossier</h2>
+      <p class="muted">
+        Saisissez le code transmis par l’agent fédéral.
+      </p>
+
+      <div class="row">
+        <input id="code" type="text" placeholder="Ex: CARLO-RICHESSE" autocomplete="off" />
+        <button id="enterBtn">Entrer</button>
+      </div>
+
+      <p id="feedback" class="muted"></p>
+
+      <hr class="sep" />
+
+      <p class="hintline">
+        « Le Don ne disait jamais rien à la légère. Chaque mot prononcé avait un sens. »
+      </p>
+    </main>
+
+    <footer class="muted small">
+      Micro-Event • Mode enquête RP
+    </footer>
+  </div>
+
+  <script>
+    const codeEl = document.getElementById("code");
+    const btn = document.getElementById("enterBtn");
+    const fb = document.getElementById("feedback");
+
+    function setFeedback(msg, isErr=false){
+      fb.textContent = msg || "";
+      fb.className = isErr ? "err" : "muted";
+    }
+
+    async function enter() {
+      const code = codeEl.value.trim();
+      if (!code) return setFeedback("Entre un code.", true);
+
+      btn.disabled = true;
+      setFeedback("Vérification…");
+
+      try {
+        const res = await fetch("/api/carlo/enter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!data?.ok) {
+          setFeedback(data?.error || "Code invalide.", true);
+          return;
+        }
+
+        // Persiste l'équipe pour éviter de ressaisir
+        localStorage.setItem("CARLO_TEAM_ID", data.teamId);
+
+        // Redirection vers le jeu
+        window.location.href = `/carlo/game.html?teamId=${encodeURIComponent(data.teamId)}`;
+      } catch (e) {
+        setFeedback("Erreur réseau. Serveur en ligne ?", true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    btn.addEventListener("click", enter);
+    codeEl.addEventListener("keydown", (e) => { if (e.key === "Enter") enter(); });
+
+    // Auto-remplissage si déjà enregistré
+    (function boot(){
+      const savedTeam = localStorage.getItem("CARLO_TEAM_ID");
+      if (savedTeam) {
+        setFeedback(`Équipe détectée (${savedTeam}). Vous pouvez entrer à nouveau avec le code, ou aller directement au jeu.`, false);
+      }
+    })();
+  </script>
+</body>
+</html>

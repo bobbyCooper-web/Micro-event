@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Le Périple du Don Carlo – Jeu</title>
+  <link rel="stylesheet" href="/carlo/carlo.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="top top-tight">
+      <div>
+        <h1 class="h1-small">Le Périple du Don Carlo</h1>
+        <div class="muted small">Équipe : <strong id="teamLabel">—</strong></div>
+      </div>
+      <div class="right">
+        <button id="refreshBtn" class="btn-ghost">Rafraîchir</button>
+        <button id="changeTeamBtn" class="btn-ghost">Changer d’équipe</button>
+      </div>
+    </header>
+
+    <main class="layout3">
+      <!-- GAUCHE : Texte -->
+      <section class="panel">
+        <h2 id="stepTitle">—</h2>
+        <p id="textIntro" class="text"></p>
+        <hr class="sep" />
+        <p class="hintline">
+          « Le Don ne disait jamais rien à la légère. Chaque mot prononcé avait un sens. »
+        </p>
+        <p class="muted small">
+          En cas de blocage : contactez l’agent fédéral.
+        </p>
+      </section>
+
+      <!-- CENTRE : Image -->
+      <section class="panel center">
+        <div class="imgWrap">
+          <img id="mainImg" alt="Illustration" />
+        </div>
+
+        <div id="unlockedWrap" class="unlocked hidden">
+          <h3>Éléments débloqués</h3>
+          <div id="unlockedGrid" class="grid"></div>
+        </div>
+      </section>
+
+      <!-- DROITE : Validation -->
+      <section class="panel">
+        <h2>Validation</h2>
+        <p id="prompt" class="muted"></p>
+
+        <div class="row">
+          <input id="answerInput" type="text" placeholder="Saisir…" autocomplete="off" />
+          <button id="submitBtn">Valider</button>
+        </div>
+
+        <p id="feedback" class="muted"></p>
+
+        <hr class="sep" />
+
+        <div class="muted small">
+          Progression : <span id="progressLabel">—</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- BAS : Frise mémoire -->
+    <footer class="timeline">
+      <div class="timelineTitle">Mémoire de l’enquête</div>
+      <div id="timelineBar" class="timelineBar"></div>
+    </footer>
+  </div>
+
+  <script src="/carlo/game.js"></script>
+</body>
+</html>
