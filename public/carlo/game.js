@@ -14,16 +14,22 @@
 
   const unlockedWrapEl = qs("unlockedWrap");
   const unlockedGridEl = qs("unlockedGrid");
-
+  const revealTitleEl = qs("revealTitle");
+  const revealTextEl = qs("revealText");
+  const continueBtnEl = qs("continueBtn");
   const refreshBtn = qs("refreshBtn");
   const changeTeamBtn = qs("changeTeamBtn");
 
   function hideReveal() {
-  unlockedWrapEl.classList.add("hidden");
-  unlockedGridEl.innerHTML = "";
+  if (unlockedWrapEl) unlockedWrapEl.classList.add("hidden");
+  if (unlockedGridEl) unlockedGridEl.innerHTML = "";
+
   if (revealTitleEl) revealTitleEl.textContent = "Dossier débloqué";
   if (revealTextEl) revealTextEl.textContent = "";
+
+  if (continueBtnEl) continueBtnEl.onclick = null;
 }
+
 
 function showReveal(reveal) {
   // reveal = { title, textSuccess, unlockImages[] }
@@ -153,34 +159,35 @@ hideReveal();
     progressLabelEl.textContent = `${(state.routeIndex ?? 0) + 1} / ${state.routeTotal ?? "?"}`;
 
     renderTimeline(state.archive);
-    renderUnlocked(step, state);
+    
 
     setFeedback("");
   }
 
   async function boot() {
-    let teamId = getTeamIdFromUrl();
-    if (!teamId) {
-      // fallback localStorage
-      teamId = localStorage.getItem("CARLO_TEAM_ID");
-      if (teamId) {
-        window.location.href = `/carlo/game.html?teamId=${encodeURIComponent(teamId)}`;
-        return;
-      }
-      window.location.href = "/carlo/index.html";
-      return;
-    }
+  let teamId = getTeamIdFromUrl();
 
-    localStorage.setItem("CARLO_TEAM_ID", teamId);
-
-    setFeedback("Chargement…");
-    const state = await fetchState(teamId).catch(() => null);
-    if (!state) {
-      setFeedback("Erreur réseau. Serveur en ligne ?", true);
-      return;
-    }
-    render(state);
+  if (!teamId) {
+    teamId = localStorage.getItem("CARLO_TEAM_ID");
   }
+
+  if (!teamId) {
+    window.location.href = "/carlo/index.html";
+    return;
+  }
+
+  localStorage.setItem("CARLO_TEAM_ID", teamId);
+
+  setFeedback("Chargement…");
+  try {
+    const state = await fetchState(teamId);
+    render(state);
+  } catch (e) {
+    setFeedback("Erreur réseau. Serveur en ligne ?", true);
+    console.error(e);
+  }
+}
+
 
   async function onSubmit() {
     const teamId = getTeamIdFromUrl();
