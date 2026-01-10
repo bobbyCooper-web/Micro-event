@@ -31,6 +31,21 @@
   const revealTextEl = qs("revealText");
   const continueBtnEl = qs("continueBtn");
 
+  function openMemoryCard({ title, thumb, content }) {
+  if (memoryTitleEl) memoryTitleEl.textContent = title || "Mémoire";
+  if (memoryTextEl) memoryTextEl.textContent = content || "";
+  if (memoryImgEl) {
+    memoryImgEl.src = thumb || "";
+    memoryImgEl.style.display = thumb ? "block" : "none";
+  }
+  if (memoryModalEl) memoryModalEl.classList.remove("hidden");
+}
+
+function closeMemoryCard() {
+  if (memoryModalEl) memoryModalEl.classList.add("hidden");
+}
+
+
   // ---------- UI helpers ----------
   function setFeedback(msg, isErr = false) {
     if (!feedbackEl) return;
@@ -126,7 +141,8 @@
         if (!raw) return;
         const obj = JSON.parse(decodeURIComponent(raw));
         // Simple pour l’instant : alerte. On pourra remplacer par une modale ensuite.
-        alert(`${obj.title}\n\n${obj.content}`);
+        openMemoryCard(obj);
+
       });
     });
   }
@@ -259,6 +275,14 @@
       window.location.href = "/carlo/index.html";
     });
   }
+  if (memoryCloseEl) memoryCloseEl.addEventListener("click", closeMemoryCard);
+if (memoryModalEl) memoryModalEl.addEventListener("click", (e) => {
+  if (e.target === memoryModalEl) closeMemoryCard();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeMemoryCard();
+});
+
 
   // Start
   boot();

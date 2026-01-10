@@ -96,3 +96,49 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .hidden { display: none !important; }
 
 .hintline { font-style: italic; }
+
+.modal.hidden { display: none !important; }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.modalCard {
+  width: min(980px, 96vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: #121b2f;
+  border: 1px solid rgba(255, 209, 102, 0.25);
+  border-radius: 14px;
+  padding: 14px;
+  position: relative;
+  box-shadow: 0 10px 35px rgba(0,0,0,.55);
+}
+
+.modalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: 1px solid rgba(255,209,102,.35);
+  color: #ffd166;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+#memoryImg {
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid rgba(255,209,102,.25);
+  background: #0f1724;
+  margin: 10px 0 12px;
+}
