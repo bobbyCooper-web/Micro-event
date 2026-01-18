@@ -7,7 +7,7 @@
     {
       "id": "carlo-richesse",
       "label": "Carlo-richesse",
-      "accessCode": "CARLO-RICHESSE",
+      "accessCode": "RICHESSE",
       "route": [
         "ch0_unicorn",
         "ch1_kiosk",
@@ -27,7 +27,7 @@
     {
       "id": "carlo-trahison",
       "label": "Carlo-trahison",
-      "accessCode": "CARLO-TRAHISON",
+      "accessCode": "TRAHISON",
       "route": [
         "ch0_unicorn",
         "ch3_alley",
@@ -47,7 +47,7 @@
     {
       "id": "carlo-business",
       "label": "Carlo-business",
-      "accessCode": "CARLO-BUSINESS",
+      "accessCode": "BUSINESS",
       "route": [
         "ch0_unicorn",
         "ch2_bar",
