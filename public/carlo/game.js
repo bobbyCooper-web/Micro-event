@@ -31,20 +31,26 @@
   const revealTextEl = qs("revealText");
   const continueBtnEl = qs("continueBtn");
 
+  // Memory card modal (si présent dans ton HTML)
+  const memoryModalEl = qs("memoryModal");
+  const memoryTitleEl = qs("memoryTitle");
+  const memoryTextEl = qs("memoryText");
+  const memoryImgEl = qs("memoryImg");
+  const memoryCloseEl = qs("memoryClose");
+
   function openMemoryCard({ title, thumb, content }) {
-  if (memoryTitleEl) memoryTitleEl.textContent = title || "Mémoire";
-  if (memoryTextEl) memoryTextEl.textContent = content || "";
-  if (memoryImgEl) {
-    memoryImgEl.src = thumb || "";
-    memoryImgEl.style.display = thumb ? "block" : "none";
+    if (memoryTitleEl) memoryTitleEl.textContent = title || "Mémoire";
+    if (memoryTextEl) memoryTextEl.textContent = content || "";
+    if (memoryImgEl) {
+      memoryImgEl.src = thumb || "";
+      memoryImgEl.style.display = thumb ? "block" : "none";
+    }
+    if (memoryModalEl) memoryModalEl.classList.remove("hidden");
   }
-  if (memoryModalEl) memoryModalEl.classList.remove("hidden");
-}
 
-function closeMemoryCard() {
-  if (memoryModalEl) memoryModalEl.classList.add("hidden");
-}
-
+  function closeMemoryCard() {
+    if (memoryModalEl) memoryModalEl.classList.add("hidden");
+  }
 
   // ---------- UI helpers ----------
   function setFeedback(msg, isErr = false) {
@@ -65,7 +71,9 @@ function closeMemoryCard() {
 
   // ---------- API ----------
   async function fetchState(teamId) {
-    const res = await fetch(`/api/carlo/state/${encodeURIComponent(teamId)}`);
+    const res = await fetch(`/api/carlo/state/${encodeURIComponent(teamId)}`, {
+      cache: "no-store",
+    });
     if (!res.ok) throw new Error(`STATE HTTP ${res.status}`);
     return await res.json();
   }
@@ -81,7 +89,10 @@ function closeMemoryCard() {
   }
 
   // ---------- Reveal / Unlock ----------
+  let revealVisible = false;
+
   function hideReveal() {
+    revealVisible = false;
     if (unlockedWrapEl) unlockedWrapEl.classList.add("hidden");
     if (unlockedGridEl) unlockedGridEl.innerHTML = "";
     if (revealTitleEl) revealTitleEl.textContent = "Dossier débloqué";
@@ -92,6 +103,8 @@ function closeMemoryCard() {
   function showReveal(reveal) {
     // reveal: { title, textSuccess, unlockImages[] }
     if (!reveal) return;
+
+    revealVisible = true;
 
     if (revealTitleEl) revealTitleEl.textContent = reveal.title || "Dossier débloqué";
     if (revealTextEl) revealTextEl.textContent = reveal.textSuccess || "";
@@ -140,18 +153,63 @@ function closeMemoryCard() {
         const raw = btn.getAttribute("data-archive");
         if (!raw) return;
         const obj = JSON.parse(decodeURIComponent(raw));
-        // Simple pour l’instant : alerte. On pourra remplacer par une modale ensuite.
         openMemoryCard(obj);
-
       });
     });
   }
 
-  // ---------- Render main state ----------
-  function render(state) {
-    // Toujours cacher la révélation lors d’un simple rechargement d’état
-    hideReveal();
+  // ---------- Diff / Smart refresh ----------
+  // On calcule une “signature” simple de l’état pour éviter de rerender si rien n’a changé.
+  function stateSignature(state) {
+    if (!state?.ok) return "ERR";
 
+    // Champs généralement suffisants pour détecter un changement visible
+    const teamId = state.teamId || "";
+    const routeIndex = state.routeIndex ?? -1;
+    const routeTotal = state.routeTotal ?? -1;
+
+    const step = state.step || {};
+    const stepTitle = step.title || "";
+    const stepImg = step.imageMain || "";
+    const stepPrompt = step.questionPrompt || "";
+    const stepIntro = step.textIntro || "";
+
+    const archive = Array.isArray(state.archive) ? state.archive : [];
+    const archiveLen = archive.length;
+    const archiveLastThumb = archiveLen ? (archive[archiveLen - 1].thumb || "") : "";
+    const archiveLastTitle = archiveLen ? (archive[archiveLen - 1].title || "") : "";
+
+    // Signature string
+    return [
+      teamId,
+      routeIndex,
+      routeTotal,
+      stepTitle,
+      stepImg,
+      stepPrompt,
+      stepIntro,
+      archiveLen,
+      archiveLastThumb,
+      archiveLastTitle,
+    ].join("|");
+  }
+
+  let lastSig = "";
+  let pollTimer = null;
+  let isSubmitting = false;
+
+  function isUserTyping() {
+    if (!answerInputEl) return false;
+    const active = document.activeElement === answerInputEl;
+    const hasText = (answerInputEl.value || "").trim().length > 0;
+    // Si focus + texte en cours, on évite de reset le champ
+    return active && hasText;
+  }
+
+  // ---------- Render main state ----------
+  function render(state, { preserveInput = false } = {}) {
+    // Important : si reveal visible, on ne force pas hideReveal ici
+    // (sinon le polling fermerait l'écran de révélation)
     if (!state?.ok) {
       setFeedback(state?.error || "Impossible de charger l’état.", true);
       return;
@@ -171,11 +229,6 @@ function closeMemoryCard() {
 
     if (promptEl) promptEl.textContent = step?.questionPrompt || "";
 
-    if (answerInputEl) {
-      answerInputEl.value = "";
-      answerInputEl.focus();
-    }
-
     if (progressLabelEl) {
       const idx = (state.routeIndex ?? 0) + 1;
       const total = state.routeTotal ?? "?";
@@ -184,10 +237,18 @@ function closeMemoryCard() {
 
     renderTimeline(state.archive);
 
-    setFeedback("");
+    // Par défaut, on reset l’input à chaque render.
+    // Mais en refresh auto on préserve si l’utilisateur est en train de taper.
+    if (answerInputEl && !preserveInput) {
+      answerInputEl.value = "";
+      answerInputEl.focus();
+    }
+
+    // Si on n'est pas en train d’afficher un reveal, on nettoie le feedback
+    if (!revealVisible) setFeedback("");
   }
 
-  // ---------- Boot ----------
+  // ---------- Boot (manual) ----------
   async function boot() {
     let teamId = getTeamIdFromUrl();
     if (!teamId) teamId = localStorage.getItem("CARLO_TEAM_ID");
@@ -202,11 +263,53 @@ function closeMemoryCard() {
     setFeedback("Chargement…");
     try {
       const state = await fetchState(teamId);
+      lastSig = stateSignature(state);
+      hideReveal(); // au chargement initial, on part propre
       render(state);
     } catch (e) {
       console.error(e);
       setFeedback("Erreur réseau. Serveur en ligne ?", true);
     }
+
+    // Lance (ou relance) le polling après boot
+    startPolling();
+  }
+
+  // ---------- Polling (refresh auto 2s) ----------
+  function stopPolling() {
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+  }
+
+  function startPolling() {
+    // évite de démarrer plusieurs fois
+    stopPolling();
+
+    const teamId = getTeamIdFromUrl() || localStorage.getItem("CARLO_TEAM_ID");
+    if (!teamId) return;
+
+    pollTimer = setInterval(async () => {
+      // Règles : si reveal affiché ou submit en cours, on ne refresh pas l’écran
+      if (revealVisible || isSubmitting) return;
+
+      try {
+        const st = await fetchState(teamId);
+        const sig = stateSignature(st);
+
+        // Si aucun changement, on ne fait rien
+        if (sig === lastSig) return;
+        lastSig = sig;
+
+        // Si l’utilisateur tape, on rerender mais sans effacer l’input
+        const preserve = isUserTyping();
+        render(st, { preserveInput: preserve });
+      } catch (e) {
+        // On évite de spam l’UI en cas de micro-coupure réseau
+        console.warn("Polling error:", e?.message || e);
+      }
+    }, 2000);
   }
 
   // ---------- Submit ----------
@@ -219,7 +322,9 @@ function closeMemoryCard() {
 
     if (!submitBtnEl) return;
 
+    isSubmitting = true;
     submitBtnEl.disabled = true;
+
     const input = (answerInputEl?.value || "").trim();
 
     try {
@@ -238,8 +343,10 @@ function closeMemoryCard() {
 
         if (continueBtnEl) {
           continueBtnEl.onclick = async () => {
+            // Quand on clique “Continuer”, on ferme reveal puis on recharge l’état
             hideReveal();
             const st = await fetchState(teamId);
+            lastSig = stateSignature(st);
             render(st);
           };
         }
@@ -249,6 +356,7 @@ function closeMemoryCard() {
 
       // Fallback si pas de reveal : on recharge l’état directement
       const st = await fetchState(teamId);
+      lastSig = stateSignature(st);
       render(st);
 
     } catch (e) {
@@ -256,6 +364,7 @@ function closeMemoryCard() {
       setFeedback("Erreur réseau.", true);
     } finally {
       submitBtnEl.disabled = false;
+      isSubmitting = false;
     }
   }
 
@@ -267,22 +376,33 @@ function closeMemoryCard() {
     });
   }
 
-  if (refreshBtn) refreshBtn.addEventListener("click", boot);
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => {
+      // Refresh manuel : recharge + relance polling
+      boot();
+    });
+  }
 
   if (changeTeamBtn) {
     changeTeamBtn.addEventListener("click", () => {
+      stopPolling();
       localStorage.removeItem("CARLO_TEAM_ID");
       window.location.href = "/carlo/index.html";
     });
   }
-  if (memoryCloseEl) memoryCloseEl.addEventListener("click", closeMemoryCard);
-if (memoryModalEl) memoryModalEl.addEventListener("click", (e) => {
-  if (e.target === memoryModalEl) closeMemoryCard();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeMemoryCard();
-});
 
+  if (memoryCloseEl) memoryCloseEl.addEventListener("click", closeMemoryCard);
+  if (memoryModalEl) {
+    memoryModalEl.addEventListener("click", (e) => {
+      if (e.target === memoryModalEl) closeMemoryCard();
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMemoryCard();
+  });
+
+  // Stop polling on page unload (propre)
+  window.addEventListener("beforeunload", () => stopPolling());
 
   // Start
   boot();
