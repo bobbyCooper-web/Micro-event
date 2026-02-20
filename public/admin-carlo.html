@@ -159,13 +159,15 @@
       const durationMs = t.timing?.durationMs;
 
       const quick = `
+        
         <div class="row-actions">
-          <button data-flag="caravan_arrived" data-val="true" data-team="${t.teamId}">Arrivée ✅</button>
-          <button data-flag="caravan_exterior_ok" data-val="true" data-team="${t.teamId}">Ext ✅</button>
-          <button data-flag="final_gate_opened" data-val="true" data-team="${t.teamId}">Phare ✅</button>
-          <button data-flag="caravan_arrived" data-val="false" data-team="${t.teamId}" class="btn-ghost">Arrivée ✕</button>
+          <button data-action="setflag-advance" data-flag="caravan_arrived" data-val="true" data-team="${t.teamId}">Arrivée ✅</button>
+          <button data-action="setflag-advance" data-flag="caravan_exterior_ok" data-val="true" data-team="${t.teamId}">Ext ✅</button>
+          <button data-action="setflag-advance" data-flag="final_gate_opened" data-val="true" data-team="${t.teamId}">Phare ✅</button>
+          <button data-action="advance" data-team="${t.teamId}" class="btn-ghost">Passer étape ▶</button>
+          <button data-action="setflag" data-flag="caravan_arrived" data-val="false" data-team="${t.teamId}" class="btn-ghost">Arrivée ✕</button>
         </div>
-      `;
+
 
       return `
         <tr>
@@ -202,6 +204,7 @@
     }
 
     async function setFlag(teamId, flag, value) {
+
       const res = await fetch('/api/admin/carlo/flag', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
@@ -211,19 +214,41 @@
       if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`);
     }
 
-    elSaveKey.addEventListener('click', () => { setKey(elKey.value.trim()); fetchOverview(); });
+
+    async function advanceStep(teamId) {
+      const res = await fetch('/api/admin/carlo/advance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ teamId })
+      });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+
+        elSaveKey.addEventListener('click', () => { setKey(elKey.value.trim()); fetchOverview(); });
     elRefreshNow.addEventListener('click', () => fetchOverview());
 
     elTbody.addEventListener('click', async (e) => {
       const t = e.target;
       if (!(t instanceof HTMLElement)) return;
       const teamId = t.getAttribute('data-team');
+      const action = t.getAttribute('data-action') || 'setflag';
       const flag = t.getAttribute('data-flag');
       const valRaw = t.getAttribute('data-val');
-      if (!teamId || !flag) return;
+      if (!teamId) return;
+      if (action !== 'advance' && !flag) return;
       const value = (valRaw === 'true') ? true : (valRaw === 'false' ? false : valRaw);
       try {
-        await setFlag(teamId, flag, value);
+        if (action === 'advance') {
+          await advanceStep(teamId);
+        } else if (action === 'setflag-advance') {
+          await setFlag(teamId, flag, value);
+          await advanceStep(teamId);
+        } else {
+          await setFlag(teamId, flag, value);
+        }
         await fetchOverview();
         setStatus('OK');
       } catch (err) {
