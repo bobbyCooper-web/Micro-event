@@ -298,3 +298,60 @@ body.hub-page{
 }
 .msg.ok{ color: var(--hub-ok); }
 .msg.err{ color: var(--hub-err); }
+
+/* ===== Admin modal (Hub) ===== */
+.hub-sep{ border:none; border-top: 1px solid rgba(148,163,184,.18); margin: 12px 0; }
+
+.hub-modal.hidden{ display:none !important; }
+.hub-modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.72);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.hub-modal-card{
+  width: min(720px, 96vw);
+  background: linear-gradient(180deg, rgba(16,28,54,.98), rgba(12,20,42,.98));
+  border: 1px solid var(--hub-border);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--hub-shadow);
+  position: relative;
+}
+
+.hub-modal-close{
+  position:absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: 1px solid var(--hub-border2);
+  color: var(--hub-text);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor:pointer;
+}
+
+.admin-links.hidden{ display:none !important; }
+.admin-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px){ .admin-grid{ grid-template-columns: 1fr; } }
+
+.admin-link{
+  display:block;
+  text-align:center;
+  padding: 12px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--hub-border2);
+  background: rgba(2,6,23,.35);
+  color: var(--hub-text);
+  text-decoration:none;
+  font-weight: 800;
+}
+.admin-link:hover{ border-color: rgba(96,165,250,.55); box-shadow: 0 12px 22px rgba(0,0,0,.35); transform: translateY(-1px); }
+
+/* petits helpers si style.css n'a pas ces classes */
+.code{ padding: 2px 6px; border-radius: 8px; border:1px solid var(--hub-border); background: rgba(2,6,23,.35); }

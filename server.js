@@ -745,6 +745,11 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(publicDir, "rallyphoto", "admin.html"));
 });
 
+// Admin Don Carlo (interface dédiée)
+app.get("/admin-carlo", (req, res) => {
+  res.sendFile(path.join(publicDir, "admin-carlo.html"));
+});
+
 // Fallback → HUB
 app.get("*", (req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Micro-Event • Hub</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/hub.css" />
+</head>
+<body class="hub-page">
+  <div class="app">
+    <header>
+      <div>
+        <h1>Micro-Event</h1>
+        <div class="muted">Hub d’accès • événements clé en main</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="adminBtn" class="btn-ghost" type="button">Admin</button>
+      </div>
+    </header>
+
+    <div class="hub">
+      <!-- GAUCHE : slides -->
+      <section class="hero">
+        <div class="slide-frame">
+          <img id="heroImg" alt="Slide" />
+        </div>
+
+        <div class="overlay">
+          <h2 id="heroTitle">—</h2>
+          <p id="heroText">—</p>
+          <div class="dots" id="dots"></div>
+        </div>
+      </section>
+
+      <!-- DROITE : accès + thèmes -->
+      <aside class="hub-side">
+        <section class="card">
+          <h2>Entrer un code</h2>
+          <p class="muted">Saisis le code transmis (ex: <span class="code">RALLY10</span>, <span class="code">CARLO</span>).</p>
+
+          <div class="access-row">
+            <input id="codeInput" type="text" placeholder="Code…" autocomplete="off" />
+            <button id="accessBtn" type="button">Entrer</button>
+          </div>
+          <div id="msg" class="muted" style="margin-top:10px;"></div>
+        </section>
+
+        <section class="card">
+          <h2>Catégories</h2>
+          <div class="theme-grid">
+            <div class="theme-card active" data-theme="outdoor">
+              <div class="theme-thumb"><img src="/photos/step1.jpg" alt="Outdoor" /></div>
+              <div class="theme-info">
+                <div class="theme-title">Outdoor • Équipe</div>
+                <div class="theme-desc">Rally photo, défis, progression.</div>
+              </div>
+            </div>
+            <div class="theme-card" data-theme="enquete">
+              <div class="theme-thumb"><img src="/carlo/img/steps/step_villa.png" alt="Enquête" /></div>
+              <div class="theme-info">
+                <div class="theme-title">Enquête • RP</div>
+                <div class="theme-desc">Le Périple du Don Carlo.</div>
+              </div>
+            </div>
+          </div>
+          <div class="muted small" style="margin-top:10px;">Tu pourras ajouter d’autres thèmes plus tard (indoor, anniversaire…).</div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ===== MODAL ADMIN ===== -->
+  <div id="adminModal" class="hub-modal hidden" role="dialog" aria-modal="true">
+    <div class="hub-modal-card">
+      <button id="adminClose" class="hub-modal-close" aria-label="Fermer">✕</button>
+      <h2>Accès admin</h2>
+      <p class="muted">Saisis la clé admin pour ouvrir les panneaux de gestion.</p>
+
+      <div class="access-row" style="margin-top:10px;">
+        <input id="adminKey" type="password" placeholder="ADMIN_KEY" autocomplete="off" />
+        <button id="adminUnlock" type="button">Déverrouiller</button>
+      </div>
+
+      <p id="adminMsg" class="muted" style="margin-top:10px;"></p>
+
+      <div id="adminLinks" class="admin-links hidden">
+        <hr class="hub-sep" />
+        <div class="admin-grid">
+          <a class="admin-link" href="/admin" target="_blank" rel="noopener">Ouvrir Admin • Rally</a>
+          <a class="admin-link" href="/admin-carlo" target="_blank" rel="noopener">Ouvrir Admin • Don Carlo</a>
+        </div>
+        <p class="muted small" style="margin-top:10px;">La clé est enregistrée dans ce navigateur (localStorage).</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =======================
+    // SLIDES
+    // =======================
+    const slides = [
+      {
+        title: 'Rally Photo',
+        text: 'Par équipes • Outdoor • progression live',
+        img: '/photos/step1.jpg'
+      },
+      {
+        title: 'Le Périple du Don Carlo',
+        text: 'Enquête fédérale • 1930s • équipes',
+        img: '/carlo/img/steps/step_villa.png'
+      }
+    ];
+
+    const heroImg = document.getElementById('heroImg');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroText = document.getElementById('heroText');
+    const dotsEl = document.getElementById('dots');
+    let slideIndex = 0;
+
+    function renderDots(){
+      dotsEl.innerHTML = slides.map((_, i)=>{
+        const cls = i === slideIndex ? 'dot active' : 'dot';
+        return `<div class="${cls}" data-i="${i}"></div>`;
+      }).join('');
+
+      dotsEl.querySelectorAll('.dot').forEach(d => {
+        d.addEventListener('click', () => {
+          const i = Number(d.getAttribute('data-i'));
+          if (!Number.isFinite(i)) return;
+          slideIndex = i;
+          renderSlide();
+        });
+      });
+    }
+
+    function renderSlide(){
+      const s = slides[slideIndex];
+      heroTitle.textContent = s.title;
+      heroText.textContent = s.text;
+      heroImg.classList.remove('loaded');
+      heroImg.onload = () => heroImg.classList.add('loaded');
+      heroImg.src = s.img;
+      renderDots();
+    }
+
+    renderSlide();
+
+    // =======================
+    // HUB ACCESS
+    // =======================
+    const codeInputEl = document.getElementById('codeInput');
+    const accessBtnEl = document.getElementById('accessBtn');
+    const msgEl = document.getElementById('msg');
+
+    function setMsg(text, isErr=false){
+      msgEl.textContent = text || '';
+      msgEl.className = isErr ? 'err' : 'muted';
+    }
+
+    async function access(){
+      const code = (codeInputEl.value || '').trim();
+      if (!code) return setMsg('Entre un code.', true);
+
+      accessBtnEl.disabled = true;
+      setMsg('Vérification…');
+
+      try {
+        const res = await fetch('/api/access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok || !data?.ok) return setMsg(data?.error || 'Code invalide.', true);
+        window.location.href = data.path;
+      } catch {
+        setMsg('Erreur réseau.', true);
+      } finally {
+        accessBtnEl.disabled = false;
+      }
+    }
+
+    accessBtnEl.addEventListener('click', access);
+    codeInputEl.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') access(); });
+
+    // =======================
+    // ADMIN MODAL
+    // =======================
+    const adminBtn = document.getElementById('adminBtn');
+    const adminModal = document.getElementById('adminModal');
+    const adminClose = document.getElementById('adminClose');
+    const adminKey = document.getElementById('adminKey');
+    const adminUnlock = document.getElementById('adminUnlock');
+    const adminMsg = document.getElementById('adminMsg');
+    const adminLinks = document.getElementById('adminLinks');
+
+    function setAdminMsg(text, isErr=false){
+      adminMsg.textContent = text || '';
+      adminMsg.className = isErr ? 'err' : 'muted';
+    }
+
+    function openAdmin(){
+      adminModal.classList.remove('hidden');
+      adminLinks.classList.add('hidden');
+      setAdminMsg('');
+      adminKey.value = localStorage.getItem('AMBEER_ADMIN_KEY') || '';
+      adminKey.focus();
+    }
+    function closeAdmin(){ adminModal.classList.add('hidden'); }
+
+    async function verifyKey(key){
+      const res = await fetch('/api/admin/carlo/overview', { headers: { 'x-admin-key': key }, cache: 'no-store' });
+      const data = await res.json().catch(()=>({}));
+      return { ok: !!data?.ok, error: data?.error || (res.ok ? '' : 'Erreur') };
+    }
+
+    async function unlockAdmin(){
+      const key = (adminKey.value || '').trim();
+      if (!key) return setAdminMsg('Entre une clé admin.', true);
+      adminUnlock.disabled = true;
+      setAdminMsg('Vérification…');
+      try {
+        const r = await verifyKey(key);
+        if (!r.ok) return setAdminMsg(r.error || 'Clé invalide.', true);
+        localStorage.setItem('AMBEER_ADMIN_KEY', key);
+        setAdminMsg('Accès déverrouillé.');
+        adminLinks.classList.remove('hidden');
+      } catch {
+        setAdminMsg('Erreur réseau.', true);
+      } finally {
+        adminUnlock.disabled = false;
+      }
+    }
+
+    adminBtn.addEventListener('click', openAdmin);
+    adminClose.addEventListener('click', closeAdmin);
+    adminModal.addEventListener('click', (e)=>{ if (e.target === adminModal) closeAdmin(); });
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeAdmin(); });
+    adminUnlock.addEventListener('click', unlockAdmin);
+    adminKey.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') unlockAdmin(); });
+  </script>
+</body>
+</html>
