@@ -69,6 +69,61 @@
     feedbackEl.className = isErr ? "err" : "muted";
   }
 
+
+  // ---------- Finale FX ----------
+  let finalePlayed = false;
+
+  function ensureFinaleOverlay() {
+    if (document.getElementById("finaleOverlay")) return;
+    const ov = document.createElement("div");
+    ov.id = "finaleOverlay";
+    ov.className = "finale-overlay";
+    document.body.appendChild(ov);
+
+    const title = document.createElement("div");
+    title.id = "finaleTitle";
+    title.className = "finale-title";
+    title.textContent = "Dossier final débloqué";
+    document.body.appendChild(title);
+  }
+
+  function launchFinaleFX() {
+    if (finalePlayed) return;
+    finalePlayed = true;
+    ensureFinaleOverlay();
+    document.body.classList.add("finale");
+
+    // confettis (JS only, pas besoin d'assets)
+    const colors = ["#ffd166", "#34d399", "#60a5fa", "#f87171", "#e5e7eb"];
+    const n = 44;
+
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[i % colors.length];
+      c.style.setProperty("--x", ((Math.random() * 2 - 1) * 180).toFixed(0) + "px");
+      c.style.setProperty("--r", (240 + Math.random() * 520).toFixed(0) + "deg");
+      c.style.setProperty("--d", (2.2 + Math.random() * 1.6).toFixed(2) + "s");
+      c.style.opacity = (0.75 + Math.random() * 0.25).toFixed(2);
+      document.body.appendChild(c);
+
+      // cleanup
+      c.addEventListener("animationend", () => c.remove());
+    }
+
+    // stop overlay after a few seconds (les confettis se nettoient seuls)
+    setTimeout(() => {
+      document.body.classList.remove("finale");
+    }, 5200);
+  }
+
+
+  function toAbs(url) {
+    if (!url) return "";
+    return url;
+  }
+
   function getTeamIdFromUrl() {
     const u = new URL(window.location.href);
     return u.searchParams.get("teamId");
@@ -236,6 +291,13 @@
 
     renderTimeline(state.archive);
 
+    // Finale : si le jeu est terminé (flag serveur), on déclenche un FX léger côté web
+    if (state?.flags?.game_completed) {
+      launchFinaleFX();
+    }
+
+    // Par défaut, on reset l’input à chaque render.
+    // Mais en refresh auto on préserve si l’utilisateur est en train de taper.
     if (answerInputEl && !preserveInput) {
       answerInputEl.value = "";
       answerInputEl.focus();
@@ -320,6 +382,11 @@
 
       if (r.reveal) {
         showReveal(r.reveal);
+
+        // Si c\'est la toute dernière étape (coffre), on joue l\'effet de finale
+        if (r.reveal?.stepId === "ch5_safe") {
+          launchFinaleFX();
+        }
 
         if (continueBtnEl) {
           continueBtnEl.onclick = async () => {

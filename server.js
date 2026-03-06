@@ -646,7 +646,7 @@ const reveal = {
   // Succès
   if (!state.startAt) state.startAt = new Date().toISOString();
 
-  applyCarloGrants(state, rule.grants || []);
+  applyCarloGrants(state, rule.grants || rule.grant || []);
 
   state.validatedSteps.push(stepId);
   state.routeIndex += 1;
@@ -737,12 +737,63 @@ app.post("/api/admin/carlo/flag", requireAdmin, (req, res) => {
   return res.json({ ok: true });
 });
 
+
+// ---- Carlo: Admin advance current step (force validate + advance)
+// Utile quand tu veux "valider" une étape côté MJ sans que le joueur clique "Valider".
+app.post("/api/admin/carlo/advance", requireAdmin, (req, res) => {
+  if (!carloPublic) return res.status(500).json({ ok: false, error: "Config carlo public manquante." });
+  if (!carloPrivate) return res.status(500).json({ ok: false, error: "Config carlo private manquante." });
+
+  const { teamId } = req.body || {};
+  const tid = String(teamId || "").trim();
+  if (!tid) return res.status(400).json({ ok: false, error: "teamId requis" });
+
+  const team = getCarloTeam(tid);
+  if (!team) return res.status(404).json({ ok: false, error: "Équipe inconnue" });
+
+  const st = initCarloTeam(tid);
+  const stepId = getCurrentCarloStepId(tid);
+  if (!stepId) return res.status(400).json({ ok: false, error: "Aucune étape en cours" });
+
+  // Applique les grants (supporte "grant" ou "grants")
+  const rule = carloPrivate.steps?.[stepId] || null;
+  const grants = rule ? (rule.grants || rule.grant || []) : [];
+  if (!st.startAt) st.startAt = new Date().toISOString();
+  applyCarloGrants(st, grants);
+
+  if (!st.validatedSteps.includes(stepId)) st.validatedSteps.push(stepId);
+  st.routeIndex += 1;
+  st.history.push({ stepId, input: "[ADMIN_ADVANCE]", ok: true, at: Date.now() });
+
+  const finished = st.routeIndex >= (team.route?.length || 0);
+  if (finished && !st.finishAt) {
+    st.finishAt = new Date().toISOString();
+    st.durationMs = st.startAt ? (new Date(st.finishAt) - new Date(st.startAt)) : null;
+  }
+
+  const nextStepId = team.route?.[st.routeIndex] || null;
+  return res.json({ ok: true, stepId, nextStepId, routeIndex: st.routeIndex, finished });
+});
+
+
 // =======================
 // Pages
 // =======================
 app.get("/admin", (req, res) => {
   // ton admin rally est dans public/rallyphoto/admin.html
   res.sendFile(path.join(publicDir, "rallyphoto", "admin.html"));
+});
+
+
+// Admin Don Carlo (page dédiée)
+app.get("/admin-carlo", (req, res) => {
+  res.sendFile(path.join(publicDir, "admin-carlo.html"));
+});
+
+
+// Admin Don Carlo (interface dédiée)
+app.get("/admin-carlo", (req, res) => {
+  res.sendFile(path.join(publicDir, "admin-carlo.html"));
 });
 
 // Fallback → HUB

@@ -17,6 +17,7 @@
         "ch2_bar",
         "ch2_docks",
         "ch2_warehouse",
+        "ch2_key",
         "ch4_trailer_arrival",
         "ch4_trailer_exterior",
         "ch4_trailer_interior",
@@ -36,6 +37,7 @@
         "ch2_bar",
         "ch2_docks",
         "ch2_warehouse",
+        "ch2_key",
         "ch1_kiosk",
         "ch4_trailer_arrival",
         "ch4_trailer_exterior",
@@ -53,6 +55,7 @@
         "ch2_bar",
         "ch2_docks",
         "ch2_warehouse",
+        "ch2_key",
         "ch1_kiosk",
         "ch3_alley",
         "ch3_parking",
@@ -67,7 +70,7 @@
   ],
   "chapters": {
     "ch1": {
-      "title": "L’Argent important"
+      "title": "L’Argent et le Pouvoir"
     },
     "ch2": {
       "title": "Les Origines"
@@ -174,11 +177,11 @@
       }
     },
     "ch2_key": {
-      "chapter" :2,
+      "chapter": 2,
       "title": "La clef des débuts du Don Carlo",
-      "imageMain":"/carlo/img/unlock/unlock_buisness_3.png",
-      "textIntro": "Différents lieux, mais une même mission, établir des bases solide a mon business.",
-      "questionPrompt": "Une organisation bien ficellé.",
+      "imageMain": "/carlo/img/unlock/unlock_buisness_3.png",
+      "textIntro": "Trois lieux. Trois fonctions. Un seul système : le socle du business du Don.",
+      "questionPrompt": "Validez le dossier « KEY » après avoir identifié Bar (1), Docks (2) et Entrepôt (3).",
       "onSuccess": {
         "unlockImages": [
           "/carlo/img/unlock/unlock_buisness_key.png"
@@ -249,11 +252,11 @@
       "chapter": 4,
       "title": "La caravane – Repérer la planque",
       "imageMain": "/carlo/img/steps/step_caravane_exterieur.png",
-      "textIntro": "La planque n’était pas faite pour vivre. Elle était faite pour disparaître.",
-      "questionPrompt": "Présentez-vous sur place et contactez l’agent fédéral pour confirmation.",
+      "textIntro": "La caravane était l’ultime roue de secours. Pas un foyer… une sortie de secours.",
+      "questionPrompt": "Mot de passe de confirmation (donné par l’agent fédéral sur place).",
       "onSuccess": {
         "unlockImages": [],
-        "textSuccess": "Planque confirmée. Cherchez ce qui a été laissé à l’extérieur."
+        "textSuccess": "Confirmation reçue. Approchez-vous et observez la zone autour de la caravane."
       },
       "archiveCard": {
         "title": "Caravane – repérée",
@@ -265,16 +268,16 @@
       "chapter": 4,
       "title": "La caravane – Le détail à l’extérieur",
       "imageMain": "/carlo/img/steps/step_caravane_exterieur.png",
-      "textIntro": "Le Don ne disait jamais rien à la légère. Chaque mot prononcé avait un sens.",
-      "questionPrompt": "Comptez l’élément extérieur (à définir). Si besoin, contactez l’agent fédéral.",
+      "textIntro": "Une planque, ça se lit comme une scène de crime. Et ici, tout parlait de fuite… et de roue de secours.",
+      "questionPrompt": "Combien de pneus traînent dans la zone autour de la caravane ?",
       "onSuccess": {
         "unlockImages": [],
-        "textSuccess": "Vous avez la confirmation. Vous pouvez maintenant fouiller l’intérieur."
+        "textSuccess": "Bien vu. Cette caravane n’était qu’un plan B… il est temps d’entrer."
       },
       "archiveCard": {
         "title": "Caravane – extérieur",
         "thumb": "/carlo/img/steps/step_caravane_exterieur.png",
-        "content": "Un détail a été noté. Ce n’était pas un hasard."
+        "content": "La caravane était son ultime roue de secours."
       }
     },
     "ch4_trailer_interior": {
@@ -282,7 +285,7 @@
       "title": "La caravane – À l’intérieur",
       "imageMain": "/carlo/img/steps/step_caravane_interieur.png",
       "textIntro": "Des papiers, des plans, des faux indices… et une route griffonnée vers la côte.",
-      "questionPrompt": "Quel chiffre est écrit à la main sur la carte ?",
+      "questionPrompt": "Il y a forcément un indice, il notait tout !",
       "onSuccess": {
         "unlockImages": [
           "/carlo/img/steps/step_caravane_interieur.png"
@@ -300,10 +303,10 @@
       "title": "Chapitre 5 – Accès au phare",
       "imageMain": "/carlo/img/steps/step_phare.png",
       "textIntro": "Il a fuit ? A-t-il laissé des choses derriere lui ? Il faut retrouver ce lieu.",
-      "questionPrompt": "Présentez-vous au maître du jeu pour recevoir la clé du phare.",
+      "questionPrompt": "Mot de passe (donné par le maître du jeu) pour recevoir la clé du phare.",
       "onSuccess": {
         "unlockImages": [],
-        "textSuccess": "Il est l'heure de savoir ce qu'il a bien pu laisser derrière lui."
+        "textSuccess": "Clé en main. Le dernier acte commence."
       },
       "archiveCard": {
         "title": "Phare – Accès",
@@ -318,13 +321,15 @@
       "textIntro": "A l'intérieur du phare vous trouvez un coffre, ce genre de méchanisme nécessite 4 chiffre. Vous ne trouvez aucune note aux alentour. Qu'es qu'il a bien pu utiliser ?",
       "questionPrompt": "Code du coffre (4 chiffres)",
       "onSuccess": {
-        "unlockImages": [],
-        "textSuccess": "Clic !! Le coffre s'ouvre."
+        "unlockImages": [
+          "/carlo/img/unlock/unlock_finale.png"
+        ],
+        "textSuccess": "Clic ! Le coffre s’ouvre. Le dossier final est à vous."
       },
       "archiveCard": {
-        "title": "Coffre – Ouvert",
-        "thumb": "/carlo/img/steps/step_phare.png",
-        "content": "Le coffre est vide mise a part une lettre."
+        "title": "Coffre – Dossier final",
+        "thumb": "/carlo/img/unlock/unlock_finale.png",
+        "content": "Le coffre cède. La légende de Don Carlo bascule dans la vérité."
       }
     }
   }

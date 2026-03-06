@@ -10,131 +10,194 @@
       "requires": [],
       "grant": []
     },
-
     "ch1_kiosk": {
       "answerType": "number",
       "answer": 6,
       "requires": [],
       "grant": [
-        { "type": "fragment", "chapter": "ch1", "value": 6 }
+        {
+          "type": "fragment",
+          "chapter": "ch1",
+          "value": 6
+        }
       ]
     },
-
     "ch2_bar": {
       "answerType": "number",
       "answer": 1,
       "requires": [],
       "grant": [
-        { "type": "clue", "key": "ch2_marker_bar", "value": 1 }
+        {
+          "type": "clue",
+          "key": "ch2_marker_bar",
+          "value": 1
+        }
       ]
     },
-
     "ch2_docks": {
       "answerType": "number",
       "answer": 2,
       "requires": [],
       "grant": [
-        { "type": "clue", "key": "ch2_marker_docks", "value": 2 }
+        {
+          "type": "clue",
+          "key": "ch2_marker_docks",
+          "value": 2
+        }
       ]
     },
-
     "ch2_warehouse": {
       "answerType": "number",
       "answer": 3,
       "requires": [],
       "grant": [
-        { "type": "clue", "key": "ch2_marker_warehouse", "value": 3 }
+        {
+          "type": "clue",
+          "key": "ch2_marker_warehouse",
+          "value": 3
+        }
       ]
     },
-
     "ch2_key": {
       "answerType": "none",
       "answer": null,
       "requires": [
-        { "type": "clue", "key": "ch2_marker_bar", "value": 1 },
-        { "type": "clue", "key": "ch2_marker_docks", "value": 2 },
-        { "type": "clue", "key": "ch2_marker_warehouse", "value": 3 }
+        {
+          "type": "clue",
+          "key": "ch2_marker_bar",
+          "value": 1
+        },
+        {
+          "type": "clue",
+          "key": "ch2_marker_docks",
+          "value": 2
+        },
+        {
+          "type": "clue",
+          "key": "ch2_marker_warehouse",
+          "value": 3
+        }
       ],
       "grant": [
-        { "type": "fragment", "chapter": "ch2", "value": 3 }
+        {
+          "type": "fragment",
+          "chapter": "ch2",
+          "value": 3
+        }
       ]
     },
-
     "ch3_alley": {
       "answerType": "number",
       "answer": 3,
       "requires": [],
       "grant": [
-        { "type": "clue", "key": "ch3_alley_value", "value": 3 }
+        {
+          "type": "clue",
+          "key": "ch3_alley_value",
+          "value": 3
+        }
       ]
     },
-
     "ch3_parking": {
       "answerType": "number",
       "answer": 3,
       "requires": [],
       "grant": [
-        { "type": "clue", "key": "ch3_parking_value", "value": 3 }
+        {
+          "type": "clue",
+          "key": "ch3_parking_value",
+          "value": 3
+        }
       ]
     },
-
     "ch3_sum": {
       "answerType": "number",
       "answer": 6,
       "requires": [],
       "grant": [
-        { "type": "fragment", "chapter": "ch3", "value": 6 }
+        {
+          "type": "fragment",
+          "chapter": "ch3",
+          "value": 6
+        }
       ]
     },
-
     "ch4_trailer_arrival": {
-      "answerType": "manualGate",
-      "answer": null,
+      "answerType": "zip",
+      "answer": "SECOURS",
       "requires": [],
       "grant": [
-        { "type": "flag", "key": "caravan_arrived", "value": true }
+        {
+          "type": "flag",
+          "key": "caravan_arrived",
+          "value": true
+        }
       ]
     },
-
     "ch4_trailer_exterior": {
-      "answerType": "manualGate",
-      "answer": null,
+      "answerType": "number",
+      "answer": 18,
       "requires": [
-        { "type": "flag", "key": "caravan_arrived", "value": true }
+        {
+          "type": "flag",
+          "key": "caravan_arrived",
+          "value": true
+        }
       ],
       "grant": [
-        { "type": "flag", "key": "caravan_exterior_ok", "value": true }
+        {
+          "type": "flag",
+          "key": "caravan_exterior_ok",
+          "value": true
+        }
       ]
     },
-
     "ch4_trailer_interior": {
       "answerType": "number",
       "answer": 9,
       "requires": [
-        { "type": "flag", "key": "caravan_exterior_ok", "value": true }
+        {
+          "type": "flag",
+          "key": "caravan_exterior_ok",
+          "value": true
+        }
       ],
       "grant": [
-        { "type": "fragment", "chapter": "ch4", "value": 9 }
+        {
+          "type": "fragment",
+          "chapter": "ch4",
+          "value": 9
+        }
       ]
     },
-
     "ch5_lighthouse_gate": {
-      "answerType": "manualGate",
-      "answer": null,
+      "answerType": "zip",
+      "answer": "PHARE",
       "requires": [],
       "grant": [
-        { "type": "flag", "key": "final_gate_opened", "value": true }
+        {
+          "type": "flag",
+          "key": "final_gate_opened",
+          "value": true
+        }
       ]
     },
-
     "ch5_safe": {
       "answerType": "code4",
       "answer": "3669",
       "requires": [
-        { "type": "flag", "key": "final_gate_opened", "value": true }
+        {
+          "type": "flag",
+          "key": "final_gate_opened",
+          "value": true
+        }
       ],
       "grant": [
-        { "type": "flag", "key": "game_completed", "value": true }
+        {
+          "type": "flag",
+          "key": "game_completed",
+          "value": true
+        }
       ]
     }
   }

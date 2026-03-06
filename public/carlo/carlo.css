@@ -142,3 +142,56 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   background: #0f1724;
   margin: 10px 0 12px;
 }
+
+
+/* ===== Finale FX (Don Carlo) ===== */
+.finale-overlay{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background:
+    radial-gradient(900px 520px at 50% 40%, rgba(255,209,102,.22), transparent 60%),
+    radial-gradient(900px 520px at 50% 40%, rgba(248,113,113,.10), transparent 62%),
+    rgba(0,0,0,.55);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+body.finale .finale-overlay{ opacity: 1; }
+
+.finale-title{
+  position: fixed;
+  left: 50%;
+  top: 14%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+  font-weight: 900;
+  letter-spacing: .6px;
+  color: #ffd166;
+  text-shadow: 0 10px 30px rgba(0,0,0,.65);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+body.finale .finale-title{ opacity: 1; }
+
+.confetti{
+  position: fixed;
+  top: -12px;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  opacity: .95;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall var(--d, 2.8s) linear forwards;
+  transform: translateX(0) rotate(0deg);
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
+@keyframes confettiFall{
+  to {
+    transform: translateX(var(--x, 0px)) translateY(110vh) rotate(var(--r, 420deg));
+    opacity: 0;
+  }
+}
+
