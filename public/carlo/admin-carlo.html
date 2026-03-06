@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin • Le Périple du Don Carlo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+    :root {
+      --bg0: #080b10;
+      --bg1: #0d1220;
+      --bg2: #121a2e;
+      --bg3: #1a2440;
+      --gold: #c9a84c;
+      --gold2: #e8c97a;
+      --gold-dim: rgba(201,168,76,.18);
+      --red: #e05a5a;
+      --green: #4caf7d;
+      --blue: #5a9ae0;
+      --muted: rgba(220,210,190,.55);
+      --text: #e8dfc8;
+      --border: rgba(201,168,76,.22);
+      --border2: rgba(201,168,76,.38);
+      --shadow: 0 12px 40px rgba(0,0,0,.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg0);
+      color: var(--text);
+      font-family: 'Crimson Text', Georgia, serif;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 800px 400px at 20% 0%, rgba(201,168,76,.06), transparent),
+        radial-gradient(ellipse 600px 400px at 80% 80%, rgba(90,154,224,.05), transparent);
+    }
+
+    /* ===== PAGE ===== */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+      background: linear-gradient(135deg, var(--bg2), var(--bg1));
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: .5px;
+    }
+
+    header .subtitle {
+      font-size: .95rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .admin-login {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .admin-login input {
+      padding: 8px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border2);
+      background: var(--bg0);
+      color: var(--text);
+      font-family: 'Crimson Text', serif;
+      font-size: 1rem;
+      width: 170px;
+      outline: none;
+    }
+    .admin-login input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.15); }
+
+    /* ===== BUTTONS ===== */
+    button {
+      font-family: 'Cinzel', serif;
+      font-size: .82rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--border2);
+      cursor: pointer;
+      transition: all .15s ease;
+      letter-spacing: .3px;
+    }
+    button:active { transform: scale(.97); }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #0d1220;
+      border-color: var(--gold2);
+    }
+    .btn-gold:hover { filter: brightness(1.08); box-shadow: 0 6px 16px rgba(201,168,76,.3); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--gold);
+    }
+    .btn-ghost:hover { background: var(--gold-dim); }
+
+    .btn-green {
+      background: linear-gradient(135deg, #2d6b4a, #3d8a60);
+      color: #cefce4;
+      border-color: rgba(76,175,125,.5);
+    }
+    .btn-green:hover { filter: brightness(1.1); box-shadow: 0 6px 14px rgba(76,175,125,.25); }
+
+    .btn-red {
+      background: linear-gradient(135deg, #6b2d2d, #8a3d3d);
+      color: #fce4ce;
+      border-color: rgba(224,90,90,.4);
+    }
+    .btn-red:hover { filter: brightness(1.1); }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      filter: none !important;
+      box-shadow: none !important;
+    }
+
+    /* ===== STATUS BAR ===== */
+    #statusBar {
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-size: .95rem;
+      margin-bottom: 18px;
+      border: 1px solid transparent;
+      display: none;
+    }
+    #statusBar.ok { display: block; background: rgba(76,175,125,.12); border-color: rgba(76,175,125,.3); color: var(--green); }
+    #statusBar.err { display: block; background: rgba(224,90,90,.1); border-color: rgba(224,90,90,.3); color: var(--red); }
+    #statusBar.info { display: block; background: rgba(201,168,76,.08); border-color: var(--border); color: var(--muted); }
+
+    /* ===== TOOLBAR ===== */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar .sep { flex: 1; }
+
+    /* ===== GRID ÉQUIPES ===== */
+    #teamsGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+    }
+
+    .team-card {
+      background: linear-gradient(160deg, var(--bg2), var(--bg1));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.4);
+      transition: border-color .2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: .4;
+    }
+    .team-card:hover { border-color: var(--border2); }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .team-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .badge {
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      white-space: nowrap;
+    }
+    .badge-green { background: rgba(76,175,125,.15); border: 1px solid rgba(76,175,125,.4); color: var(--green); }
+    .badge-gold  { background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.35); color: var(--gold); }
+    .badge-muted { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); color: var(--muted); }
+
+    .team-progress {
+      margin-bottom: 12px;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .88rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-wrap {
+      height: 5px;
+      background: rgba(255,255,255,.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold2));
+      border-radius: 999px;
+      transition: width .4s ease;
+    }
+
+    .step-info {
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: .9rem;
+    }
+
+    .step-info .step-label {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .step-info .step-sub {
+      color: var(--muted);
+      font-size: .85rem;
+      font-style: italic;
+    }
+
+    .flags-section {
+      margin-bottom: 12px;
+    }
+
+    .flags-title {
+      font-size: .8rem;
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+    }
+
+    .flags-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .flag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.2);
+      border: 1px solid var(--border);
+    }
+
+    .flag-key {
+      font-size: .83rem;
+      color: var(--muted);
+      font-family: 'Crimson Text', serif;
+      font-style: italic;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .flag-value {
+      font-size: .83rem;
+      font-weight: 600;
+    }
+    .flag-value.true { color: var(--green); }
+    .flag-value.false { color: var(--red); }
+
+    .flag-actions {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .flag-btn {
+      padding: 4px 9px;
+      font-size: .72rem;
+      border-radius: 7px;
+    }
+
+    /* ===== GATES (manualGate) ===== */
+    .gate-section {
+      margin-bottom: 12px;
+    }
+
+    .gate-title {
+      font-size: .8rem;
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+    }
+
+    .gate-card {
+      background: rgba(201,168,76,.06);
+      border: 1px solid rgba(201,168,76,.3);
+      border-radius: 10px;
+      padding: 11px 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gate-card.done {
+      background: rgba(76,175,125,.06);
+      border-color: rgba(76,175,125,.3);
+    }
+
+    .gate-name {
+      font-size: .9rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .gate-sub {
+      font-size: .82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* ===== FRAGMENTS ===== */
+    .fragments-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .fragment-chip {
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(201,168,76,.1);
+      border: 1px solid rgba(201,168,76,.3);
+      font-size: .78rem;
+      color: var(--gold2);
+      font-family: 'Cinzel', serif;
+    }
+
+    /* ===== TEAM CARD FOOTER ===== */
+    .team-footer {
+      display: flex;
+      gap: 7px;
+      justify-content: flex-end;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    /* ===== TIMING ===== */
+    .timing-line {
+      font-size: .82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .timing-line span { color: var(--gold2); font-weight: 600; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 1.1rem;
+      grid-column: 1/-1;
+    }
+
+    /* ===== MODAL CUSTOM FLAG ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9999;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.hidden { display: none !important; }
+
+    .modal-box {
+      background: linear-gradient(160deg, var(--bg3), var(--bg2));
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 20px;
+      width: min(420px, 100%);
+      box-shadow: 0 20px 60px rgba(0,0,0,.7);
+      position: relative;
+    }
+
+    .modal-box h3 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+
+    .modal-field { margin-bottom: 12px; }
+    .modal-field label {
+      display: block;
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-style: italic;
+    }
+    .modal-field input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border2);
+      background: var(--bg0);
+      color: var(--text);
+      font-family: 'Crimson Text', serif;
+      font-size: 1rem;
+      outline: none;
+    }
+    .modal-field input:focus { border-color: var(--gold); }
+
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- HEADER -->
+    <header>
+      <div>
+        <h1>🗂 Don Carlo — Agent Fédéral</h1>
+        <div class="subtitle">Tableau de bord opérationnel • Accès restreint</div>
+      </div>
+      <div class="admin-login">
+        <input id="adminKeyInput" type="password" placeholder="Clé admin…" />
+        <button class="btn-gold" id="connectBtn">Connexion</button>
+      </div>
+    </header>
+
+    <!-- STATUS -->
+    <div id="statusBar"></div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar" id="toolbar" style="display:none">
+      <button class="btn-ghost" id="refreshBtn">⟳ Actualiser</button>
+      <div class="sep"></div>
+      <button class="btn-ghost" id="customFlagBtn">＋ Flag manuel</button>
+    </div>
+
+    <!-- GRID -->
+    <div id="teamsGrid">
+      <div class="empty">Connectez-vous avec la clé admin pour accéder au tableau de bord.</div>
+    </div>
+
+  </div>
+
+  <!-- MODAL FLAG CUSTOM -->
+  <div id="customFlagModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Poser un flag manuellement</h3>
+      <div class="modal-field">
+        <label>Équipe (teamId)</label>
+        <input id="mTeamId" type="text" placeholder="carlo-richesse" />
+      </div>
+      <div class="modal-field">
+        <label>Clé du flag</label>
+        <input id="mFlagKey" type="text" placeholder="caravan_arrived" />
+      </div>
+      <div class="modal-field">
+        <label>Valeur (true / false)</label>
+        <input id="mFlagVal" type="text" value="true" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="mCancelBtn">Annuler</button>
+        <button class="btn-gold" id="mConfirmBtn">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // =====================
+    // CONFIG DES MANUALGATE
+    // Associe chaque flag à son label lisible et sa description
+    // =====================
+    const GATE_LABELS = {
+      caravan_arrived:      { label: "Caravane repérée",    desc: "L'équipe est sur place" },
+      caravan_exterior_ok:  { label: "Extérieur validé",    desc: "Détail extérieur confirmé" },
+      final_gate_opened:    { label: "Accès phare ouvert",  desc: "Clé remise par le MJ" },
+      game_completed:       { label: "Jeu terminé",         desc: "Coffre ouvert" }
+    };
+
+    // Flags qui correspondent aux manualGate (seuls ceux-là ont un bouton "Valider")
+    const MANUAL_FLAGS = new Set([
+      "caravan_arrived",
+      "caravan_exterior_ok",
+      "final_gate_opened"
+    ]);
+
+    // =====================
+    // STATE
+    // =====================
+    let adminKey = "";
+    let polling = null;
+    let teamsData = [];
+
+    // =====================
+    // DOM
+    // =====================
+    const statusBar    = document.getElementById("statusBar");
+    const teamsGrid    = document.getElementById("teamsGrid");
+    const toolbar      = document.getElementById("toolbar");
+    const connectBtn   = document.getElementById("connectBtn");
+    const adminKeyIn   = document.getElementById("adminKeyInput");
+    const refreshBtn   = document.getElementById("refreshBtn");
+    const customFlagBtn = document.getElementById("customFlagBtn");
+    const modal        = document.getElementById("customFlagModal");
+    const mTeamId      = document.getElementById("mTeamId");
+    const mFlagKey     = document.getElementById("mFlagKey");
+    const mFlagVal     = document.getElementById("mFlagVal");
+    const mCancelBtn   = document.getElementById("mCancelBtn");
+    const mConfirmBtn  = document.getElementById("mConfirmBtn");
+
+    function setStatus(msg, type = "info") {
+      statusBar.textContent = msg;
+      statusBar.className = type;
+    }
+
+    function clearStatus() {
+      statusBar.className = "";
+    }
+
+    // =====================
+    // API
+    // =====================
+    async function apiFetch(url, opts = {}) {
+      const res = await fetch(url, {
+        ...opts,
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": adminKey,
+          ...(opts.headers || {})
+        }
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    async function loadOverview() {
+      const { ok, data, status } = await apiFetch("/api/admin/carlo/overview");
+      if (!ok) {
+        if (status === 401) {
+          setStatus("Clé admin invalide ou expirée.", "err");
+          stopPolling();
+        } else {
+          setStatus(data?.error || "Erreur serveur.", "err");
+        }
+        return false;
+      }
+      teamsData = data.teams || [];
+      renderTeams();
+      clearStatus();
+      return true;
+    }
+
+    async function setFlag(teamId, flagKey, flagValue) {
+      const { ok, data } = await apiFetch("/api/admin/carlo/flag", {
+        method: "POST",
+        body: JSON.stringify({ teamId, flag: flagKey, value: flagValue })
+      });
+      if (!ok) {
+        setStatus(data?.error || "Erreur lors du flag.", "err");
+        return false;
+      }
+      return true;
+    }
+
+    // =====================
+    // RENDER
+    // =====================
+    function formatDuration(ms) {
+      if (!ms) return "—";
+      const tot = Math.floor(ms / 1000);
+      const h = Math.floor(tot / 3600);
+      const m = Math.floor((tot % 3600) / 60);
+      const s = tot % 60;
+      if (h) return `${h}h ${m}min ${s}s`;
+      if (m) return `${m}min ${s}s`;
+      return `${s}s`;
+    }
+
+    function elapsedStr(startAt) {
+      if (!startAt) return null;
+      const ms = Date.now() - new Date(startAt).getTime();
+      return formatDuration(ms);
+    }
+
+    function renderTeams() {
+      if (!teamsData.length) {
+        teamsGrid.innerHTML = `<div class="empty">Aucune équipe connectée pour le moment.</div>`;
+        return;
+      }
+
+      teamsGrid.innerHTML = teamsData.map(t => renderTeamCard(t)).join("");
+
+      // Bind buttons
+      teamsGrid.querySelectorAll("[data-flag-set]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const teamId = btn.dataset.teamId;
+          const flagKey = btn.dataset.flagKey;
+          const flagVal = btn.dataset.flagVal === "true";
+          btn.disabled = true;
+          const ok = await setFlag(teamId, flagKey, flagVal);
+          if (ok) {
+            setStatus(`✅ Flag "${flagKey}" → ${flagVal} appliqué à ${teamId}`, "ok");
+            await loadOverview();
+          }
+          btn.disabled = false;
+        });
+      });
+    }
+
+    function renderTeamCard(t) {
+      const pct = t.routeTotal > 0 ? Math.round((t.routeIndex / t.routeTotal) * 100) : 0;
+      const flags = t.flags || {};
+      const fragments = t.fragments || {};
+
+      // Badge statut
+      let badgeHtml = "";
+      if (t.status === "finished")   badgeHtml = `<span class="badge badge-green">✓ Terminé</span>`;
+      else if (t.status === "running") badgeHtml = `<span class="badge badge-gold">▶ En cours</span>`;
+      else                            badgeHtml = `<span class="badge badge-muted">— En attente</span>`;
+
+      // Timing
+      let timingHtml = "";
+      if (t.timing?.finished) {
+        timingHtml = `<div class="timing-line">Durée : <span>${formatDuration(t.timing.durationMs)}</span></div>`;
+      } else if (t.timing?.started) {
+        timingHtml = `<div class="timing-line">En jeu depuis : <span>${elapsedStr(t.timing.startAt)}</span></div>`;
+      }
+
+      // Étape courante
+      const stepHtml = t.stepTitle
+        ? `<div class="step-info">
+            <div class="step-label">${escHtml(t.stepTitle)}</div>
+            <div class="step-sub">${escHtml(t.stepId || "")} • étape ${t.routeIndex + 1}/${t.routeTotal}</div>
+           </div>`
+        : "";
+
+      // ManualGates — on liste uniquement les flags connus comme manuels
+      const gateEntries = Object.entries(GATE_LABELS).filter(([k]) => MANUAL_FLAGS.has(k));
+      let gatesHtml = "";
+      if (gateEntries.length) {
+        gatesHtml = `
+          <div class="gate-section">
+            <div class="gate-title">Portes manuelles</div>
+            ${gateEntries.map(([key, meta]) => {
+              const isSet = flags[key] === true;
+              return `
+                <div class="gate-card ${isSet ? "done" : ""}">
+                  <div>
+                    <div class="gate-name">${escHtml(meta.label)}</div>
+                    <div class="gate-sub">${escHtml(meta.desc)}</div>
+                  </div>
+                  ${isSet
+                    ? `<span class="badge badge-green">✓ OK</span>`
+                    : `<button class="btn-green flag-btn" data-flag-set="1"
+                        data-team-id="${escAttr(t.teamId)}"
+                        data-flag-key="${escAttr(key)}"
+                        data-flag-val="true">Valider</button>`
+                  }
+                </div>`;
+            }).join("")}
+          </div>`;
+      }
+
+      // Fragments collectés
+      let fragmentsHtml = "";
+      const fragEntries = Object.entries(fragments);
+      if (fragEntries.length) {
+        fragmentsHtml = `
+          <div class="flags-section">
+            <div class="flags-title">Fragments collectés</div>
+            <div class="fragments-row">
+              ${fragEntries.map(([ch, val]) =>
+                `<span class="fragment-chip">${escHtml(ch)} : ${val}</span>`
+              ).join("")}
+            </div>
+          </div>`;
+      }
+
+      // Autres flags (non-manuels)
+      const otherFlags = Object.entries(flags).filter(([k]) => !MANUAL_FLAGS.has(k));
+      let otherFlagsHtml = "";
+      if (otherFlags.length) {
+        otherFlagsHtml = `
+          <div class="flags-section">
+            <div class="flags-title">Flags système</div>
+            <div class="flags-grid">
+              ${otherFlags.map(([k, v]) => `
+                <div class="flag-row">
+                  <span class="flag-key">${escHtml(k)}</span>
+                  <span class="flag-value ${v === true ? 'true' : v === false ? 'false' : ''}">${String(v)}</span>
+                  ${v === true ? `
+                    <div class="flag-actions">
+                      <button class="btn-red flag-btn" data-flag-set="1"
+                        data-team-id="${escAttr(t.teamId)}"
+                        data-flag-key="${escAttr(k)}"
+                        data-flag-val="false">Annuler</button>
+                    </div>` : ""}
+                </div>`
+              ).join("")}
+            </div>
+          </div>`;
+      }
+
+      return `
+        <div class="team-card">
+          <div class="team-header">
+            <div class="team-name">${escHtml(t.label || t.teamId)}</div>
+            ${badgeHtml}
+          </div>
+
+          ${timingHtml}
+
+          <div class="team-progress">
+            <div class="progress-row">
+              <span>Progression</span>
+              <span>${t.routeIndex} / ${t.routeTotal} étapes</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="width:${pct}%"></div>
+            </div>
+          </div>
+
+          ${stepHtml}
+          ${gatesHtml}
+          ${fragmentsHtml}
+          ${otherFlagsHtml}
+
+          <div class="team-footer">
+            <span class="timing-line" style="flex:1;margin:0;align-self:center;">
+              ${t.wrongAttempts ? `${t.wrongAttempts} tentative(s) incorrecte(s)` : ""}
+            </span>
+          </div>
+        </div>`;
+    }
+
+    // =====================
+    // POLLING
+    // =====================
+    function startPolling() {
+      stopPolling();
+      polling = setInterval(() => loadOverview(), 4000);
+    }
+
+    function stopPolling() {
+      if (polling) { clearInterval(polling); polling = null; }
+    }
+
+    // =====================
+    // CONNECT
+    // =====================
+    async function connect() {
+      const key = adminKeyIn.value.trim();
+      if (!key) { setStatus("Entre la clé admin.", "err"); return; }
+      adminKey = key;
+      connectBtn.disabled = true;
+      setStatus("Connexion…", "info");
+      const ok = await loadOverview();
+      connectBtn.disabled = false;
+      if (ok) {
+        toolbar.style.display = "flex";
+        startPolling();
+        setStatus("✅ Connecté — actualisation toutes les 4s", "ok");
+      } else {
+        adminKey = "";
+      }
+    }
+
+    connectBtn.addEventListener("click", connect);
+    adminKeyIn.addEventListener("keydown", e => { if (e.key === "Enter") connect(); });
+
+    refreshBtn.addEventListener("click", () => loadOverview());
+
+    // =====================
+    // MODAL FLAG CUSTOM
+    // =====================
+    customFlagBtn.addEventListener("click", () => {
+      mTeamId.value = "";
+      mFlagKey.value = "";
+      mFlagVal.value = "true";
+      modal.classList.remove("hidden");
+      mTeamId.focus();
+    });
+
+    mCancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
+    modal.addEventListener("click", e => { if (e.target === modal) modal.classList.add("hidden"); });
+
+    mConfirmBtn.addEventListener("click", async () => {
+      const tid = mTeamId.value.trim();
+      const key = mFlagKey.value.trim();
+      const raw = mFlagVal.value.trim();
+      if (!tid || !key) { setStatus("TeamId et clé requis.", "err"); return; }
+      const val = raw === "false" ? false : raw === "true" ? true : raw;
+      mConfirmBtn.disabled = true;
+      const ok = await setFlag(tid, key, val);
+      mConfirmBtn.disabled = false;
+      if (ok) {
+        modal.classList.add("hidden");
+        setStatus(`✅ Flag "${key}" posé sur ${tid}`, "ok");
+        await loadOverview();
+      }
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") modal.classList.add("hidden");
+    });
+
+    // =====================
+    // Escape HTML
+    // =====================
+    function escHtml(s) {
+      return String(s || "")
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+    function escAttr(s) { return escHtml(s); }
+
+    window.addEventListener("beforeunload", stopPolling);
+  })();
+  </script>
+</body>
+</html>
