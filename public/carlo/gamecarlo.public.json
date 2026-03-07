@@ -303,14 +303,14 @@
       "questionPrompt": "Code du coffre (4 chiffres)",
       "onSuccess": {
         "unlockImages": [
-          "/carlo/img/unlock/unlock_finale.png"
+          "/carlo/img/unlock/lettre_finale.png"
         ],
-        "textSuccess": "Clic ! Le coffre s’ouvre. Le dossier final est à vous."
+        "textSuccess": "Clic ! Le coffre s'ouvre. Une lettre pliée attend à l'intérieur…"
       },
       "archiveCard": {
-        "title": "Coffre – Dossier final",
-        "thumb": "/carlo/img/unlock/unlock_finale.png",
-        "content": "Le coffre cède. La légende de Don Carlo bascule dans la vérité."
+        "title": "La lettre finale",
+        "thumb": "/carlo/img/unlock/lettre_finale.png",
+        "content": "Une lettre du fils. La vérité sur la trahison."
       }
     }
   }
