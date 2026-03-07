@@ -616,7 +616,7 @@ const reveal = {
         }
       } else if (r?.type === "clue") {
         if ((state.clues?.[r.key]) !== r.value) {
-          return res.json({ ok: false, message: "Indices manquants — validez d\'abord les étapes précédentes." });
+          return res.json({ ok: false, message: "Indices manquants — validez d'abord les étapes précédentes." });
         }
       }
     }
