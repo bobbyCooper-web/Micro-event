@@ -74,8 +74,9 @@
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ teamId, input }),
     });
-    if (!res.ok) throw new Error(`SUBMIT HTTP ${res.status}`);
-    return res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `SUBMIT HTTP ${res.status}`);
+    return data;
   }
 
   // ---- Reveal ----

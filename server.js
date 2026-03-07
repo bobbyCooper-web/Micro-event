@@ -631,8 +631,10 @@ const reveal = {
       isValid = true;
       break;
     case "number":
-    case "zip":
       isValid = String(rule.answer) === input;
+      break;
+    case "zip":
+      isValid = String(rule.answer).toUpperCase() === input.toUpperCase();
       break;
     case "code4":
       isValid = String(rule.answer) === input;
