@@ -298,7 +298,7 @@
     "ch5_safe": {
       "chapter": 5,
       "title": "Le coffre",
-      "imageMain": "/carlo/img/steps/step_phare.png",
+      "imageMain": "/carlo/img/steps/step_phare_ouvert.png",
       "textIntro": "A l'intérieur du phare vous trouvez un coffre, ce genre de méchanisme nécessite 4 chiffre. Vous ne trouvez aucune note aux alentour. Qu'es qu'il a bien pu utiliser ?",
       "questionPrompt": "Code du coffre (4 chiffres)",
       "onSuccess": {
