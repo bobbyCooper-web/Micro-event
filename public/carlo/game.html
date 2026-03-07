@@ -15,72 +15,56 @@
       </div>
       <div class="right">
         <button id="refreshBtn" class="btn-ghost">Rafraîchir</button>
-        <button id="changeTeamBtn" class="btn-ghost">Changer d’équipe</button>
+        <button id="changeTeamBtn" class="btn-ghost">Changer d'équipe</button>
       </div>
     </header>
 
     <main class="layout3">
-      <!-- GAUCHE : Texte -->
       <section class="panel">
         <h2 id="stepTitle">—</h2>
         <p id="textIntro" class="text"></p>
         <hr class="sep" />
-        <p class="hintline">
-          « Le Don ne disait jamais rien à la légère. Chaque mot prononcé avait un sens. »
-        </p>
-        <p class="muted small">
-          En cas de blocage : contactez l’agent fédéral.
-        </p>
+        <p class="hintline">« Le Don ne disait jamais rien à la légère. Chaque mot prononcé avait un sens. »</p>
+        <p class="muted small">En cas de blocage : contactez l'agent fédéral.</p>
       </section>
 
-      <!-- CENTRE : Image -->
       <section class="panel center">
         <div class="imgWrap">
           <img id="mainImg" alt="Illustration" />
         </div>
-
         <div id="unlockedWrap" class="unlocked hidden">
-            <h3 id="revealTitle">Dossier débloqué</h3>
-            <p id="revealText" class="muted"></p>
-            <div id="unlockedGrid" class="grid"></div>
-                <div style="margin-top:10px;">
-                <button id="continueBtn" type="button">Continuer</button>
-            </div>
+          <h3 id="revealTitle">Dossier débloqué</h3>
+          <p id="revealText" class="muted"></p>
+          <div id="unlockedGrid" class="grid"></div>
+          <div style="margin-top:10px;">
+            <button id="continueBtn" type="button">Continuer</button>
+          </div>
         </div>
-
       </section>
 
-      <!-- DROITE : Validation -->
       <section class="panel">
         <h2>Validation</h2>
         <p id="prompt" class="muted"></p>
-
         <div class="row">
           <input id="answerInput" type="text" placeholder="Saisir…" autocomplete="off" />
           <button id="submitBtn">Valider</button>
         </div>
-
         <p id="feedback" class="muted"></p>
-
         <hr class="sep" />
-
-        <div class="muted small">
-          Progression : <span id="progressLabel">—</span>
-        </div>
+        <div class="muted small">Progression : <span id="progressLabel">—</span></div>
       </section>
     </main>
 
-    <!-- BAS : Frise mémoire -->
     <footer class="timeline">
-      <div class="timelineTitle">Mémoire de l’enquête</div>
+      <div class="timelineTitle">Mémoire de l'enquête</div>
       <div id="timelineBar" class="timelineBar"></div>
     </footer>
   </div>
 
-  <!-- MODALE MEMOIRE — doit etre dans le DOM avant le script -->
+  <!-- MODALE MEMOIRE : doit être AVANT game.js -->
   <div id="memoryModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modalCard">
-      <button id="memoryClose" class="modalClose" aria-label="Fermer">X</button>
+      <button id="memoryClose" class="modalClose" aria-label="Fermer">✕</button>
       <h2 id="memoryTitle"></h2>
       <img id="memoryImg" alt="" />
       <p id="memoryText" class="text"></p>
