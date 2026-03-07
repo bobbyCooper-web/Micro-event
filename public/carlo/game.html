@@ -77,15 +77,16 @@
     </footer>
   </div>
 
-  <script src="/carlo/game.js"></script>
-  
+  <!-- MODALE MEMOIRE — doit etre dans le DOM avant le script -->
   <div id="memoryModal" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="modalCard">
-    <button id="memoryClose" class="modalClose" aria-label="Fermer">✕</button>
-    <h2 id="memoryTitle"></h2>
-    <img id="memoryImg" alt="" />
-    <p id="memoryText" class="text"></p>
+    <div class="modalCard">
+      <button id="memoryClose" class="modalClose" aria-label="Fermer">X</button>
+      <h2 id="memoryTitle"></h2>
+      <img id="memoryImg" alt="" />
+      <p id="memoryText" class="text"></p>
+    </div>
   </div>
-</div>
+
+  <script src="/carlo/game.js"></script>
 </body>
 </html>
