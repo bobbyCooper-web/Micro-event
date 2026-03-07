@@ -6,38 +6,80 @@
   <title>Admin • Don Carlo</title>
   <link rel="stylesheet" href="/style.css" />
   <style>
-    body { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
-    h1 { margin: 0 0 6px; }
-    .admin-bar { display:flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0 14px; }
+    body { max-width: 1300px; margin: 20px auto; padding: 0 16px; font-family: system-ui, sans-serif; }
+    h1 { margin: 0 0 4px; }
+    .admin-bar { display:flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0 18px; }
     .admin-bar input[type="password"] { min-width: 240px; }
-    .muted { opacity: .8; }
-    .error { color: var(--err); font-weight: 800; }
-    .success { color: var(--ok); font-weight: 800; }
-
-    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
-    th, td { padding: 10px 10px; border-bottom: 1px solid rgba(148,163,184,.14); vertical-align: middle; }
-    th { text-align: left; background: rgba(255,255,255,.03); color: rgba(229,231,235,.92); font-weight: 900; }
-    td.num { text-align: right; white-space: nowrap; }
-
-    .tag { display:inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(148,163,184,.25); background: rgba(2,6,23,.35); font-size: 12px; }
-    .tag.ok { border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12); }
-    .tag.warn { border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12); }
-
-    .row-actions { display:flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-    .row-actions button { padding: 8px 10px; }
-    .mini { font-size: 12px; }
-
-    .gridFlags { display:flex; gap: 6px; flex-wrap: wrap; }
-    .gridFlags .tag { cursor: default; }
-
-    .top-actions { display:flex; gap: 8px; align-items: center; }
+    .muted { opacity: .7; font-size: .9rem; }
+    .error { color: #ef4444; font-weight: 800; }
+    .success { color: #22c55e; font-weight: 800; }
     .spacer { flex: 1; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid rgba(148,163,184,.14); vertical-align: top; }
+    th { text-align: left; background: rgba(255,255,255,.03); font-weight: 900; font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; color: rgba(163,173,194,.8); }
+
+    /* Tags statut */
+    .tag { display:inline-block; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(148,163,184,.25); background: rgba(2,6,23,.35); font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .tag.ok    { border-color: rgba(34,197,94,.5);  background: rgba(34,197,94,.15);  color: #86efac; }
+    .tag.warn  { border-color: rgba(245,158,11,.5); background: rgba(245,158,11,.15); color: #fcd34d; }
+    .tag.idle  { border-color: rgba(148,163,184,.3); color: rgba(163,173,194,.7); }
+    .tag.done  { border-color: rgba(99,102,241,.5); background: rgba(99,102,241,.15); color: #a5b4fc; }
+
+    /* Étape en cours */
+    .step-name { font-weight: 700; font-size: .95rem; }
+    .step-sub  { font-size: .78rem; color: rgba(163,173,194,.7); margin-top: 2px; }
+
+    /* Bloc action MJ */
+    .mj-action {
+      background: rgba(245,158,11,.08);
+      border: 1px solid rgba(245,158,11,.35);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 6px;
+    }
+    .mj-action .mj-label {
+      font-size: .78rem;
+      font-weight: 900;
+      color: #fcd34d;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+    .mj-action button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(245,158,11,.5);
+      background: rgba(245,158,11,.18);
+      color: #fef3c7;
+      font-weight: 800;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .mj-action button:hover { background: rgba(245,158,11,.32); }
+
+    /* Aucune action requise */
+    .no-action { font-size: .8rem; color: rgba(163,173,194,.45); font-style: italic; }
+
+    /* Flags */
+    .flags-list { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    /* Temps */
+    .time-val { font-weight: 700; font-size: .95rem; }
+    .time-sub { font-size: .75rem; color: rgba(163,173,194,.6); }
+
+    /* En-tête section */
+    .section-title { font-size: .75rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; color: rgba(163,173,194,.5); margin: 20px 0 8px; }
+
+    #status { min-height: 20px; margin-bottom: 8px; font-size: .88rem; }
   </style>
 </head>
 <body>
   <header>
-    <h1>Admin • Don Carlo</h1>
-    <div class="muted">Validation par flags • Vue progression (sans réponses)</div>
+    <h1>Agent Fédéral — Panneau de contrôle</h1>
+    <div class="muted">Don Carlo • Suivi temps réel des équipes</div>
 
     <div class="admin-bar">
       <label for="adminkey"><strong>Clé admin</strong></label>
@@ -45,68 +87,62 @@
       <button id="saveKey">Enregistrer</button>
       <span id="keyStatus" class="muted"></span>
       <span class="spacer"></span>
-      <div class="top-actions">
-        <button id="refreshNow">Rafraîchir</button>
-        <label class="muted">
-          Auto-refresh:
-          <select id="autoint">
-            <option value="0">Off</option>
-            <option value="1000">1s</option>
-            <option value="2000" selected>2s</option>
-            <option value="5000">5s</option>
-          </select>
-        </label>
-      </div>
+      <button id="refreshNow">↻ Rafraîchir</button>
+      <label class="muted" style="display:flex;align-items:center;gap:6px;">
+        Auto :
+        <select id="autoint">
+          <option value="0">Off</option>
+          <option value="1000">1s</option>
+          <option value="2000" selected>2s</option>
+          <option value="5000">5s</option>
+        </select>
+      </label>
     </div>
   </header>
 
-  <section id="status" class="muted"></section>
+  <div id="status" class="muted"></div>
 
-  <section>
-    <table>
-      <thead>
-        <tr>
-          <th>Équipe</th>
-          <th>Statut</th>
-          <th>Étape en cours</th>
-          <th class="num">Progression</th>
-          <th>Flags</th>
-          <th class="num">Erreurs</th>
-          <th class="num">Début</th>
-          <th class="num">Fin</th>
-          <th class="num">Temps</th>
-          <th class="num">Actions rapides</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="10" class="muted">Chargement…</td></tr>
-      </tbody>
-    </table>
-  </section>
+  <div class="section-title">Équipes en jeu</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Équipe</th>
+        <th>Statut</th>
+        <th>Étape en cours</th>
+        <th>⚡ Action MJ requise</th>
+        <th>Flags actifs</th>
+        <th>Erreurs</th>
+        <th>Chrono</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      <tr><td colspan="7" class="muted">Chargement…</td></tr>
+    </tbody>
+  </table>
 
   <script>
-    const elKey = document.getElementById('adminkey');
-    const elSaveKey = document.getElementById('saveKey');
+    const elKey       = document.getElementById('adminkey');
+    const elSaveKey   = document.getElementById('saveKey');
     const elKeyStatus = document.getElementById('keyStatus');
-    const elStatus = document.getElementById('status');
-    const elTbody = document.getElementById('tbody');
-    const elRefreshNow = document.getElementById('refreshNow');
-    const elAutoInt = document.getElementById('autoint');
+    const elStatus    = document.getElementById('status');
+    const elTbody     = document.getElementById('tbody');
+    const elRefresh   = document.getElementById('refreshNow');
+    const elAutoInt   = document.getElementById('autoint');
 
     function getKey() { return localStorage.getItem('AMBEER_ADMIN_KEY') || ''; }
     function setKey(k) {
       localStorage.setItem('AMBEER_ADMIN_KEY', k || '');
-      elKeyStatus.textContent = k ? 'Clé enregistrée' : 'Aucune clé';
+      elKeyStatus.textContent = k ? '✓ Clé enregistrée' : 'Aucune clé';
       elKeyStatus.className = k ? 'success' : 'muted';
     }
     function authHeaders() {
       const key = getKey();
       return key ? { 'x-admin-key': key } : {};
     }
-
-    function setStatus(msg, isError=false) {
+    function setStatus(msg, isErr=false) {
       elStatus.textContent = msg || '';
-      elStatus.className = isError ? 'error' : 'muted';
+      elStatus.className = isErr ? 'error' : 'muted';
     }
 
     function msToClock(ms) {
@@ -119,153 +155,202 @@
     }
 
     function fmtTime(iso) {
-      if (!iso) return '—';
-      const d = new Date(iso);
-      return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      if (!iso) return null;
+      return new Date(iso).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
     }
 
     function tag(label, cls='') {
       return `<span class="tag ${cls}">${label}</span>`;
     }
 
-    function flagsCell(flags={}) {
-      const entries = Object.entries(flags || {});
-      if (!entries.length) return `<span class="muted mini">—</span>`;
-      const wanted = ['caravan_arrived','caravan_exterior_ok','final_gate_opened','game_completed'];
-      const ordered = wanted
-        .map(k => [k, flags?.[k]])
-        .filter(([k,v]) => v !== undefined)
-        .concat(entries.filter(([k]) => !wanted.includes(k)));
+    // Détermine l'action MJ selon l'étape en cours et les flags
+    function mjActionCell(t) {
+      const stepId = t.stepId || '';
+      const flags  = t.flags  || {};
 
-      return `
-        <div class="gridFlags">
-          ${ordered.map(([k,v]) => tag(`${k}:${String(v)}`, v === true ? 'ok' : '')) .join('')}
-        </div>
-      `;
+      // Étape : La caravane – Repérer la planque
+      // → L'équipe attend que le MJ leur donne le mot "SECOURS"
+      if (stepId === 'ch4_trailer_arrival') {
+        return `
+          <div class="mj-action">
+            <div class="mj-label">📢 À dire à l'équipe</div>
+            <div style="font-size:.85rem;color:#fef3c7;margin-bottom:6px;">
+              Donnez-leur le mot de passe : <strong>SECOURS</strong>
+            </div>
+            <div class="no-action" style="margin-top:4px;">L'équipe valide elle-même.</div>
+          </div>`;
+      }
+
+      // Étape : Accès au phare (manualGate)
+      // → L'équipe a tapé son nom d'équipe, MJ doit valider
+      if (stepId === 'ch5_lighthouse_gate') {
+        return `
+          <div class="mj-action">
+            <div class="mj-label">🔑 Valider l'accès au phare</div>
+            <div style="font-size:.85rem;color:#fef3c7;margin-bottom:8px;">
+              L'équipe a donné son nom. Confirmez leur accès :
+            </div>
+            <button data-action="setflag-advance" data-flag="final_gate_opened" data-val="true" data-team="${t.teamId}">
+              ✅ Ouvrir le phare pour ${t.label || t.teamId}
+            </button>
+          </div>`;
+      }
+
+      // Partie terminée
+      if (t.status === 'finished') {
+        return tag('🏁 Partie terminée', 'done');
+      }
+
+      // Pas encore commencé
+      if (t.status === 'idle') {
+        return `<div class="no-action">En attente du code d'accès équipe</div>`;
+      }
+
+      // Toutes les autres étapes : les joueurs gèrent seuls
+      return `<div class="no-action">Aucune action requise — les joueurs progressent seuls</div>`;
+    }
+
+    function flagsCell(flags={}) {
+      const relevant = ['caravan_arrived','final_gate_opened','game_completed'];
+      const labels = {
+        caravan_arrived:    '🚐 Caravane repérée',
+        final_gate_opened:  '🔦 Phare ouvert',
+        game_completed:     '🏁 Jeu terminé',
+      };
+      const active = relevant.filter(k => flags[k] === true);
+      if (!active.length) return `<span class="no-action">—</span>`;
+      return `<div class="flags-list">${active.map(k => tag(labels[k] || k, 'ok')).join('')}</div>`;
     }
 
     function statusTag(t) {
-      if (t.status === 'finished') return tag('FINI', 'ok');
-      if (t.status === 'running') return tag('EN COURS', 'warn');
-      return tag('NON DÉMARRÉ');
+      if (t.status === 'finished') return tag('🏁 TERMINÉ', 'done');
+      if (t.status === 'running')  return tag('▶ EN COURS', 'warn');
+      return tag('⏳ EN ATTENTE', 'idle');
+    }
+
+    function chronoCell(t) {
+      const started  = fmtTime(t.timing?.startAt);
+      const finished = fmtTime(t.timing?.finishAt);
+      const dur      = t.timing?.durationMs;
+
+      if (!started) return `<span class="no-action">—</span>`;
+      if (finished && dur != null) {
+        return `
+          <div class="time-val">${msToClock(dur)}</div>
+          <div class="time-sub">Début ${started} → Fin ${finished}</div>`;
+      }
+      // Chrono live
+      const startMs = t.timing?.startAt ? new Date(t.timing.startAt).getTime() : null;
+      const liveMs  = startMs ? Date.now() - startMs : null;
+      return `
+        <div class="time-val" data-live="${startMs || ''}">${msToClock(liveMs)}</div>
+        <div class="time-sub">Début ${started}</div>`;
     }
 
     function row(t) {
-      const idx = Number(t.routeIndex) || 0;
+      const idx   = Number(t.routeIndex) || 0;
       const total = Number(t.routeTotal) || 0;
-      const step = t.stepTitle ? `${t.stepTitle}` : (t.stepId || '—');
-      const started = t.timing?.startAt;
-      const finished = t.timing?.finishAt;
-      const durationMs = t.timing?.durationMs;
-
-      const quick = `
-        
-        <div class="row-actions">
-          <button data-action="setflag-advance" data-flag="caravan_arrived" data-val="true" data-team="${t.teamId}">Arrivée ✅</button>
-          <button data-action="setflag-advance" data-flag="caravan_exterior_ok" data-val="true" data-team="${t.teamId}">Ext ✅</button>
-          <button data-action="setflag-advance" data-flag="final_gate_opened" data-val="true" data-team="${t.teamId}">Phare ✅</button>
-          <button data-action="advance" data-team="${t.teamId}" class="btn-ghost">Passer étape ▶</button>
-          <button data-action="setflag" data-flag="caravan_arrived" data-val="false" data-team="${t.teamId}" class="btn-ghost">Arrivée ✕</button>
-        </div>
-      `;
+      const stepLabel = t.stepTitle || t.stepId || (t.status === 'finished' ? 'Terminé' : '—');
+      const prog  = t.status === 'finished'
+        ? tag(`${total}/${total} étapes`, 'ok')
+        : `<span style="font-size:.85rem;">${Math.min(idx+1,total)} / ${total}</span>`;
 
       return `
         <tr>
-          <td><strong>${t.label || t.teamId}</strong><div class="muted mini">${t.teamId}</div></td>
+          <td>
+            <strong>${t.label || t.teamId}</strong>
+            <div class="muted">${t.teamId}</div>
+          </td>
           <td>${statusTag(t)}</td>
-          <td>${step}</td>
-          <td class="num"><strong>${Math.min(idx+1, total)} / ${total || '—'}</strong></td>
+          <td>
+            <div class="step-name">${stepLabel}</div>
+            <div class="step-sub">${prog}</div>
+          </td>
+          <td>${mjActionCell(t)}</td>
           <td>${flagsCell(t.flags)}</td>
-          <td class="num">${Number(t.wrongAttempts || 0)}</td>
-          <td class="num">${fmtTime(started)}</td>
-          <td class="num">${fmtTime(finished)}</td>
-          <td class="num"><strong>${msToClock(durationMs)}</strong></td>
-          <td class="num">${quick}</td>
-        </tr>
-      `;
+          <td style="text-align:center;">${Number(t.wrongAttempts || 0)}</td>
+          <td>${chronoCell(t)}</td>
+        </tr>`;
     }
 
     async function fetchOverview() {
       try {
-        const res = await fetch('/api/admin/carlo/overview', { headers: { ...authHeaders() }, cache: 'no-store' });
+        const res  = await fetch('/api/admin/carlo/overview', { headers: { ...authHeaders() }, cache: 'no-store' });
         const data = await res.json().catch(()=>({}));
         if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`);
 
         const teams = data.teams || [];
         if (!teams.length) {
-          elTbody.innerHTML = `<tr><td colspan="10" class="muted">Aucune équipe configurée.</td></tr>`;
+          elTbody.innerHTML = `<tr><td colspan="7" class="muted">Aucune équipe configurée.</td></tr>`;
           return;
         }
         elTbody.innerHTML = teams.map(row).join('');
         setStatus('');
-      } catch (e) {
+      } catch(e) {
         setStatus(`Erreur: ${e.message}`, true);
       }
     }
 
     async function setFlag(teamId, flag, value) {
-
-      const res = await fetch('/api/admin/carlo/flag', {
-        method: 'POST',
+      const res  = await fetch('/api/admin/carlo/flag', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ teamId, flag, value })
+        body:    JSON.stringify({ teamId, flag, value })
       });
       const data = await res.json().catch(()=>({}));
       if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`);
     }
-
 
     async function advanceStep(teamId) {
-      const res = await fetch('/api/admin/carlo/advance', {
-        method: 'POST',
+      const res  = await fetch('/api/admin/carlo/advance', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ teamId })
+        body:    JSON.stringify({ teamId })
       });
       const data = await res.json().catch(()=>({}));
       if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`);
-      return data;
     }
 
-
-        elSaveKey.addEventListener('click', () => { setKey(elKey.value.trim()); fetchOverview(); });
-    elRefreshNow.addEventListener('click', () => fetchOverview());
-
     elTbody.addEventListener('click', async (e) => {
-      const t = e.target;
-      if (!(t instanceof HTMLElement)) return;
-      const teamId = t.getAttribute('data-team');
-      const action = t.getAttribute('data-action') || 'setflag';
-      const flag = t.getAttribute('data-flag');
-      const valRaw = t.getAttribute('data-val');
-      if (!teamId) return;
-      if (action !== 'advance' && !flag) return;
-      const value = (valRaw === 'true') ? true : (valRaw === 'false' ? false : valRaw);
+      const btn = e.target.closest('button[data-team]');
+      if (!btn) return;
+      const teamId = btn.getAttribute('data-team');
+      const action = btn.getAttribute('data-action');
+      const flag   = btn.getAttribute('data-flag');
+      const valRaw = btn.getAttribute('data-val');
+      const value  = valRaw === 'true' ? true : valRaw === 'false' ? false : valRaw;
+
+      btn.disabled = true;
       try {
-        if (action === 'advance') {
-          await advanceStep(teamId);
-        } else if (action === 'setflag-advance') {
+        if (action === 'setflag-advance') {
           await setFlag(teamId, flag, value);
+          await advanceStep(teamId);
+        } else if (action === 'advance') {
           await advanceStep(teamId);
         } else {
           await setFlag(teamId, flag, value);
         }
+        setStatus('✓ Action effectuée');
         await fetchOverview();
-        setStatus('OK');
-      } catch (err) {
-        setStatus(err.message || 'Erreur action', true);
+      } catch(err) {
+        setStatus(err.message || 'Erreur', true);
+        btn.disabled = false;
       }
     });
+
+    elSaveKey.addEventListener('click',  () => { setKey(elKey.value.trim()); fetchOverview(); });
+    elRefresh.addEventListener('click',  () => fetchOverview());
 
     let refreshHandle = null;
     function setupInterval(ms) {
       if (refreshHandle) clearInterval(refreshHandle);
-      if (ms && ms > 0) refreshHandle = setInterval(fetchOverview, ms);
+      if (ms > 0) refreshHandle = setInterval(fetchOverview, ms);
     }
     elAutoInt.addEventListener('change', () => setupInterval(Number(elAutoInt.value)));
 
     (function init(){
       const saved = getKey();
-      if (saved) { elKey.value = saved; elKeyStatus.textContent = 'Clé enregistrée'; elKeyStatus.className = 'success'; }
+      if (saved) { elKey.value = saved; elKeyStatus.textContent = '✓ Clé enregistrée'; elKeyStatus.className = 'success'; }
       else { elKeyStatus.textContent = 'Aucune clé'; elKeyStatus.className = 'muted'; }
       fetchOverview();
       setupInterval(Number(elAutoInt.value));
