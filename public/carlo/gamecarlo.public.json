@@ -187,7 +187,7 @@
       },
       "archiveCard": {
         "title": "Origines Fragment 3",
-        "thumb": "/carlo/img/unlock/unlock_buisness_key.png",
+        "thumb": "/carlo/img/unlock/unlock_business_key.png",
         "content": "3 lieux, 3 fonctions, 3 éléments"
       }
     },
@@ -284,14 +284,14 @@
       "title": "Chapitre 5 – Accès au phare",
       "imageMain": "/carlo/img/steps/step_phare.png",
       "textIntro": "Il a fuit ? A-t-il laissé des choses derriere lui ? Il faut retrouver ce lieu.",
-      "questionPrompt": "Donnez le nom de votre équipe de départ (Richesse / Trahison / Business) — le MJ validera de son côté.",
+      "questionPrompt": "Donnez le nom de votre équipe de départ (Richesse / Trahison / Business) — le Marshall validera de son côté.",
       "onSuccess": {
         "unlockImages": [],
         "textSuccess": "Clé en main. Le dernier acte commence."
       },
       "archiveCard": {
         "title": "Phare – Accès",
-        "thumb": "/carlo/img/steps/unlock_phare.png",
+        "thumb": "/carlo/img/steps/step_phare.png",
         "content": "Un phare dans la nuit."
       }
     },
