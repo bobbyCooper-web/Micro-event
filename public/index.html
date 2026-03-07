@@ -1,275 +1,244 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Micro-Event • Hub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- CSS global + CSS Hub -->
-   <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/hub.css" />
-  <!-- si tu as créé un fichier dédié -->
-  <!-- <link rel="stylesheet" href="/hub.css" /> -->
 </head>
-
 <body class="hub-page">
   <div class="app">
-
-    <!-- ===== HEADER ===== -->
     <header>
       <div>
         <h1>Micro-Event</h1>
-        <div class="muted">Contactez nous au 555-2041 ou au 555-EZRA</div>
+        <div class="muted">Hub d’accès • événements clé en main</div>
       </div>
-      <button id="adminHubBtn" type="button" style="padding:7px 14px;border-radius:9px;border:1px solid rgba(148,163,184,.25);background:transparent;color:rgba(163,173,194,.6);font-size:.78rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='#e5e7eb';this.style.borderColor='rgba(148,163,184,.5)'" onmouseout="this.style.color='rgba(163,173,194,.6)';this.style.borderColor='rgba(148,163,184,.25)'">Admin</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="adminBtn" class="btn-ghost" type="button">Admin</button>
+      </div>
     </header>
 
-    <!-- ===== LAYOUT HUB ===== -->
-    <main class="hub">
-
-      <!-- ===== SLIDER / PRÉSENTATION ===== -->
+    <div class="hub">
+      <!-- GAUCHE : slides -->
       <section class="hero">
-
-        <!-- Frame téléphone -->
         <div class="slide-frame">
-          <img id="slideImg" alt="Présentation événement" loading="lazy" />
+          <img id="heroImg" alt="Slide" />
         </div>
 
-        <!-- Texte associé -->
         <div class="overlay">
-          <h2 id="slideTitle">Chargement…</h2>
-          <p id="slideText" class="muted"></p>
+          <h2 id="heroTitle">—</h2>
+          <p id="heroText">—</p>
           <div class="dots" id="dots"></div>
         </div>
-
       </section>
 
-      <!-- ===== COLONNE DROITE ===== -->
+      <!-- DROITE : accès + thèmes -->
       <aside class="hub-side">
-
-        <!-- ===== ACCÈS PAR CODE ===== -->
-        <div class="card">
-          <h2>Accès par code</h2>
-
-          <p class="muted">
-            Entrez le code fourni après validation pour accéder à votre expérience.
-          </p>
+        <section class="card">
+          <h2>Entrer un code</h2>
+          <p class="muted">Saisis le code transmis (ex: <span class="code">RALLY10</span>, <span class="code">CARLO</span>).</p>
 
           <div class="access-row">
-            <input
-              id="accessCode"
-              type="text"
-              placeholder="Entrez le code ici"
-              autocomplete="off"
-            />
-            <button id="goBtn" type="button">Accéder</button>
+            <input id="codeInput" type="text" placeholder="Code…" autocomplete="off" />
+            <button id="accessBtn" type="button">Entrer</button>
           </div>
+          <div id="msg" class="muted" style="margin-top:10px;"></div>
+        </section>
 
-          <div id="msg" class="msg muted"></div>
-        </div>
-
-        <!-- ===== AUTRES THÈMES (FUTUR) ===== -->
-        <div class="card">
-          <h2>Autres formats</h2>
-
-          <div class="theme-grid" id="themeGrid">
-            <!-- Exemple statique, tu pourras générer ça dynamiquement plus tard -->
-            <div class="theme-card active">
-              <div class="theme-thumb">
-                <img src="/hub/icone-jeux G-A.png" alt="" />
-              </div>
+        <section class="card">
+          <h2>Catégories</h2>
+          <div class="theme-grid">
+            <div class="theme-card active" data-theme="outdoor">
+              <div class="theme-thumb"><img src="/photos/step1.jpg" alt="Outdoor" /></div>
               <div class="theme-info">
-                <div class="theme-title">Grand air & équipes</div>
-                <div class="theme-desc">Rally, orientation, défis</div>
+                <div class="theme-title">Outdoor • Équipe</div>
+                <div class="theme-desc">Rally photo, défis, progression.</div>
               </div>
             </div>
-
-            <div class="theme-card">
-              <div class="theme-thumb">
-                <img src="/hub/workinprogress.png" alt="" />
-              </div>
+            <div class="theme-card" data-theme="enquete">
+              <div class="theme-thumb"><img src="/carlo/img/steps/step_villa.png" alt="Enquête" /></div>
               <div class="theme-info">
-                <div class="theme-title">Work in progress</div>
-                <div class="theme-desc">Bientôt !</div>
-              </div>
-            </div>
-
-            <div class="theme-card">
-              <div class="theme-thumb">
-                <img src="/hub/workinprogress.png" alt="" />
-              </div>
-              <div class="theme-info">
-                <div class="theme-title">Work in progress</div>
-                <div class="theme-desc">Bientôt !</div>
+                <div class="theme-title">Enquête • RP</div>
+                <div class="theme-desc">Le Périple du Don Carlo.</div>
               </div>
             </div>
           </div>
-
-          <div class="muted" style="margin-top:10px;">
-            Retrouvez bientôt plus de formats et thèmes d'événements !
-          </div>
-        </div>
-
+          <div class="muted small" style="margin-top:10px;">Tu pourras ajouter d’autres thèmes plus tard (indoor, anniversaire…).</div>
+        </section>
       </aside>
-    </main>
+    </div>
   </div>
 
-  <!-- ===== SCRIPT ===== -->
-  <script>
-    /* ================= SLIDES ================= */
+  <!-- ===== MODAL ADMIN ===== -->
+  <div id="adminModal" class="hub-modal hidden" role="dialog" aria-modal="true">
+    <div class="hub-modal-card">
+      <button id="adminClose" class="hub-modal-close" aria-label="Fermer">✕</button>
+      <h2>Accès admin</h2>
+      <p class="muted">Saisis la clé admin pour ouvrir les panneaux de gestion.</p>
 
+      <div class="access-row" style="margin-top:10px;">
+        <input id="adminKey" type="password" placeholder="ADMIN_KEY" autocomplete="off" />
+        <button id="adminUnlock" type="button">Déverrouiller</button>
+      </div>
+
+      <p id="adminMsg" class="muted" style="margin-top:10px;"></p>
+
+      <div id="adminLinks" class="admin-links hidden">
+        <hr class="hub-sep" />
+        <div class="admin-grid">
+          <a class="admin-link" href="/admin" target="_blank" rel="noopener">Ouvrir Admin • Rally</a>
+          <a class="admin-link" href="/admin/carlo" target="_blank" rel="noopener">Ouvrir Admin • Don Carlo</a>
+        </div>
+        <p class="muted small" style="margin-top:10px;">La clé est enregistrée dans ce navigateur (localStorage).</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =======================
+    // SLIDES
+    // =======================
     const slides = [
       {
-        title: "Rally Photo",
-        text: "Épreuve d’orientation en équipe avec indices, validation par code et classement.",
-        img: "/hub/slide-rally.png"
+        title: 'Rally Photo',
+        text: 'Par équipes • Outdoor • progression live',
+        img: '/photos/step1.jpg'
       },
       {
-        title: "Quiz Team (bientôt)",
-        text: "Questions, défis chronométrés et manches collectives.",
-        img: "/hub/slide-quiz.png"
-      },
-      {
-        title: "Escape Game (bientôt)",
-        text: "Énigmes, narration et progression immersive.",
-        img: "/hub/slide-escape.png"
+        title: 'Le Périple du Don Carlo',
+        text: 'Enquête fédérale • 1930s • équipes',
+        img: '/carlo/img/steps/step_villa.png'
       }
     ];
 
-    let idx = 0;
-    let timer = null;
+    const heroImg = document.getElementById('heroImg');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroText = document.getElementById('heroText');
+    const dotsEl = document.getElementById('dots');
+    let slideIndex = 0;
 
-    const elImg   = document.getElementById("slideImg");
-    const elTitle = document.getElementById("slideTitle");
-    const elText  = document.getElementById("slideText");
-    const elDots  = document.getElementById("dots");
-    const elCode  = document.getElementById("accessCode");
-    const elMsg   = document.getElementById("msg");
+    function renderDots(){
+      dotsEl.innerHTML = slides.map((_, i)=>{
+        const cls = i === slideIndex ? 'dot active' : 'dot';
+        return `<div class="${cls}" data-i="${i}"></div>`;
+      }).join('');
 
-    function setMsg(text, type="muted") {
-      elMsg.textContent = text || "";
-      elMsg.className = "msg " + type;
+      dotsEl.querySelectorAll('.dot').forEach(d => {
+        d.addEventListener('click', () => {
+          const i = Number(d.getAttribute('data-i'));
+          if (!Number.isFinite(i)) return;
+          slideIndex = i;
+          renderSlide();
+        });
+      });
     }
 
-    function renderDots() {
-      elDots.innerHTML = slides.map((_, i) =>
-        `<div class="dot ${i === idx ? "active" : ""}" data-i="${i}"></div>`
-      ).join("");
-    }
-
-    function showSlide(i) {
-      idx = (i + slides.length) % slides.length;
-      const s = slides[idx];
-
-      elTitle.textContent = s.title;
-      elText.textContent = s.text;
-
-      elImg.classList.remove("loaded");
-      elImg.onload = () => elImg.classList.add("loaded");
-      elImg.onerror = () => elImg.classList.remove("loaded");
-      elImg.src = s.img;
-
+    function renderSlide(){
+      const s = slides[slideIndex];
+      heroTitle.textContent = s.title;
+      heroText.textContent = s.text;
+      heroImg.classList.remove('loaded');
+      heroImg.onload = () => heroImg.classList.add('loaded');
+      heroImg.src = s.img;
       renderDots();
     }
 
-    function startAuto() {
-      clearInterval(timer);
-      timer = setInterval(() => showSlide(idx + 1), 4500);
+    renderSlide();
+
+    // =======================
+    // HUB ACCESS
+    // =======================
+    const codeInputEl = document.getElementById('codeInput');
+    const accessBtnEl = document.getElementById('accessBtn');
+    const msgEl = document.getElementById('msg');
+
+    function setMsg(text, isErr=false){
+      msgEl.textContent = text || '';
+      msgEl.className = isErr ? 'err' : 'muted';
     }
 
-    elDots.addEventListener("click", (e) => {
-      const i = e.target?.dataset?.i;
-      if (i == null) return;
-      showSlide(Number(i));
-      startAuto();
-    });
+    async function access(){
+      const code = (codeInputEl.value || '').trim();
+      if (!code) return setMsg('Entre un code.', true);
 
-    /* ================= ACCÈS PAR CODE ================= */
-
-    let isAccessing = false;
-
-    async function access() {
-      if (isAccessing) return;
-      isAccessing = true;
-
-      const code = (elCode.value || "")
-        .trim()
-        .replace(/\s+/g, "")
-        .toUpperCase();
-
-      if (!code) {
-        setMsg("Veuillez entrer un code.", "err");
-        elCode.focus();
-        isAccessing = false;
-        return;
-      }
-
-      setMsg("Vérification…", "muted");
+      accessBtnEl.disabled = true;
+      setMsg('Vérification…');
 
       try {
-        const res = await fetch("/api/access", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })
         });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || !data.ok) {
-          setMsg(data.error || "Code invalide.", "err");
-          isAccessing = false;
-          return;
-        }
-
-        setMsg(`Accès validé : ${data.label || "événement"}…`, "ok");
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok || !data?.ok) return setMsg(data?.error || 'Code invalide.', true);
         window.location.href = data.path;
-
       } catch {
-        setMsg("Erreur réseau. Réessayez.", "err");
-        isAccessing = false;
+        setMsg('Erreur réseau.', true);
+      } finally {
+        accessBtnEl.disabled = false;
       }
     }
 
-    document.getElementById("goBtn").addEventListener("click", access);
-    elCode.addEventListener("keydown", e => {
-      if (e.key === "Enter") access();
-    });
+    accessBtnEl.addEventListener('click', access);
+    codeInputEl.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') access(); });
 
-    /* ================= BOOT ================= */
-    showSlide(0);
-    startAuto();
-    setMsg("");
-  /* ===== BOUTON ADMIN ===== */
-  (function(){
-    var btn = document.getElementById("adminHubBtn");
-    if(!btn) return;
+    // =======================
+    // ADMIN MODAL
+    // =======================
+    const adminBtn = document.getElementById('adminBtn');
+    const adminModal = document.getElementById('adminModal');
+    const adminClose = document.getElementById('adminClose');
+    const adminKey = document.getElementById('adminKey');
+    const adminUnlock = document.getElementById('adminUnlock');
+    const adminMsg = document.getElementById('adminMsg');
+    const adminLinks = document.getElementById('adminLinks');
 
-    var overlay = null;
-
-    function createOverlay(){
-      overlay = document.createElement("div");
-      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);";
-
-      var box = document.createElement("div");
-      box.style.cssText = "background:#0d1220;border:1px solid rgba(59,130,246,.4);border-radius:14px;padding:22px;width:min(360px,100%);box-shadow:0 20px 60px rgba(0,0,0,.7);";
-
-      box.innerHTML = '<div style="font-size:1rem;font-weight:800;color:#e5e7eb;margin-bottom:6px;">Accès administrateur</div><div style="font-size:.88rem;color:rgba(163,173,194,.8);margin-bottom:16px;font-style:italic;">Choisissez le panneau à ouvrir</div><div style="display:flex;flex-direction:column;gap:8px;"><a href="/admin/carlo" target="_blank" style="display:block;padding:11px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(96,165,250,.1));border:1px solid rgba(59,130,246,.4);color:#e5e7eb;text-decoration:none;font-size:.92rem;font-weight:700;transition:all .15s;" onmouseover="this.style.borderColor='rgba(96,165,250,.7)'" onmouseout="this.style.borderColor='rgba(59,130,246,.4)'">🗂 Don Carlo — Agent Fédéral</a><a href="/admin" target="_blank" style="display:block;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(148,163,184,.2);color:rgba(163,173,194,.7);text-decoration:none;font-size:.92rem;font-weight:700;" >📋 Rally Photo — Admin</a></div><div style="margin-top:14px;text-align:right;"><button onclick="document.body.removeChild(document.getElementById('adminOverlay'))" style="padding:7px 14px;border-radius:9px;border:1px solid rgba(148,163,184,.25);background:transparent;color:rgba(163,173,194,.6);font-size:.82rem;cursor:pointer;">Fermer</button></div>';
-
-      overlay.id = "adminOverlay";
-      overlay.appendChild(box);
-      overlay.addEventListener("click", function(e){ if(e.target===overlay) document.body.removeChild(overlay); });
-      document.body.appendChild(overlay);
+    function setAdminMsg(text, isErr=false){
+      adminMsg.textContent = text || '';
+      adminMsg.className = isErr ? 'err' : 'muted';
     }
 
-    btn.addEventListener("click", function(){
-      if(document.getElementById("adminOverlay")) return;
-      createOverlay();
-    });
+    function openAdmin(){
+      adminModal.classList.remove('hidden');
+      adminLinks.classList.add('hidden');
+      setAdminMsg('');
+      adminKey.value = localStorage.getItem('AMBEER_ADMIN_KEY') || '';
+      adminKey.focus();
+    }
+    function closeAdmin(){ adminModal.classList.add('hidden'); }
 
-    document.addEventListener("keydown", function(e){
-      if(e.key==="Escape"){ var o=document.getElementById("adminOverlay"); if(o) document.body.removeChild(o); }
-    });
-  })();
+    async function verifyKey(key){
+      const res = await fetch('/api/admin/carlo/overview', { headers: { 'x-admin-key': key }, cache: 'no-store' });
+      const data = await res.json().catch(()=>({}));
+      return { ok: !!data?.ok, error: data?.error || (res.ok ? '' : 'Erreur') };
+    }
+
+    async function unlockAdmin(){
+      const key = (adminKey.value || '').trim();
+      if (!key) return setAdminMsg('Entre une clé admin.', true);
+      adminUnlock.disabled = true;
+      setAdminMsg('Vérification…');
+      try {
+        const r = await verifyKey(key);
+        if (!r.ok) return setAdminMsg(r.error || 'Clé invalide.', true);
+        localStorage.setItem('AMBEER_ADMIN_KEY', key);
+        setAdminMsg('Accès déverrouillé.');
+        adminLinks.classList.remove('hidden');
+      } catch {
+        setAdminMsg('Erreur réseau.', true);
+      } finally {
+        adminUnlock.disabled = false;
+      }
+    }
+
+    adminBtn.addEventListener('click', openAdmin);
+    adminClose.addEventListener('click', closeAdmin);
+    adminModal.addEventListener('click', (e)=>{ if (e.target === adminModal) closeAdmin(); });
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeAdmin(); });
+    adminUnlock.addEventListener('click', unlockAdmin);
+    adminKey.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') unlockAdmin(); });
   </script>
 </body>
 </html>

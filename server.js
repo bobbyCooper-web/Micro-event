@@ -486,6 +486,7 @@ function initCarloTeam(teamId) {
       validatedSteps: [],
       fragments: {},
       flags: {},
+      clues: {},
       wrongAttempts: 0,
       startAt: null,
       finishAt: null,
@@ -515,6 +516,10 @@ function applyCarloGrants(state, grants = []) {
       state.fragments[g.chapter] = g.value;
     } else if (g.type === "flag") {
       state.flags[g.key] = g.value;
+    } else if (g.type === "clue") {
+      // Les clues sont stockées dans state.clues pour les requires
+      if (!state.clues) state.clues = {};
+      state.clues[g.key] = g.value;
     }
   }
 }
@@ -602,12 +607,16 @@ const reveal = {
     return res.json({ ok: true, message: "OK" });
   }
 
-  // Gestion requires (flags)
+  // Gestion requires (flags + clues)
   if (Array.isArray(rule.requires)) {
     for (const r of rule.requires) {
       if (r?.type === "flag") {
         if (state.flags?.[r.key] !== r.value) {
           return res.json({ ok: false, message: "Accès verrouillé." });
+        }
+      } else if (r?.type === "clue") {
+        if ((state.clues?.[r.key]) !== r.value) {
+          return res.json({ ok: false, message: "Indices manquants — validez d'abord les étapes précédentes." });
         }
       }
     }
@@ -712,11 +721,45 @@ app.get("/api/admin/carlo/overview", requireAdmin, (req, res) => {
       },
       wrongAttempts: st.wrongAttempts || 0,
       fragments: st.fragments || {},
-      flags: st.flags || {}
+      flags: st.flags || {},
+      clues: st.clues || {}
     };
   });
 
   return res.json({ ok: true, teams: out });
+});
+
+
+// ---- Carlo: Admin advance (passer l'étape courante manuellement)
+app.post("/api/admin/carlo/advance", requireAdmin, (req, res) => {
+  const teamId = String(req.body?.teamId || "").trim();
+  if (!teamId) return res.status(400).json({ ok: false, error: "teamId requis" });
+
+  const team = getCarloTeam(teamId);
+  if (!team) return res.status(404).json({ ok: false, error: "Équipe inconnue" });
+
+  const st = initCarloTeam(teamId);
+  const total = team.route?.length || 0;
+
+  if (st.routeIndex >= total) {
+    return res.json({ ok: false, error: "Équipe déjà au bout de sa route." });
+  }
+
+  const stepId = team.route[st.routeIndex];
+  if (stepId) st.validatedSteps.push(stepId);
+
+  st.routeIndex += 1;
+  st.history.push({ stepId, input: "ADMIN_ADVANCE", ok: true, at: Date.now() });
+
+  if (!st.startAt) st.startAt = new Date().toISOString();
+
+  const finished = st.routeIndex >= total;
+  if (finished && !st.finishAt) {
+    st.finishAt = new Date().toISOString();
+    st.durationMs = st.startAt ? (new Date(st.finishAt) - new Date(st.startAt)) : null;
+  }
+
+  return res.json({ ok: true, routeIndex: st.routeIndex, finished });
 });
 
 // ---- Carlo: Admin set flag (valider caravane/phare etc.)
@@ -740,13 +783,13 @@ app.post("/api/admin/carlo/flag", requireAdmin, (req, res) => {
 // =======================
 // Pages
 // =======================
-app.get("/admin/carlo", (req, res) => {
-  res.sendFile(path.join(publicDir, "carlo", "admin-carlo.html"));
-});
-
 app.get("/admin", (req, res) => {
   // ton admin rally est dans public/rallyphoto/admin.html
   res.sendFile(path.join(publicDir, "rallyphoto", "admin.html"));
+});
+
+app.get("/admin/carlo", (req, res) => {
+  res.sendFile(path.join(publicDir, "carlo", "admin-carlo.html"));
 });
 
 // Fallback → HUB
