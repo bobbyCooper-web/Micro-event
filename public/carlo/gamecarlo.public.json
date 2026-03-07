@@ -177,11 +177,11 @@
       "chapter": 2,
       "title": "La clef des débuts du Don Carlo",
       "imageMain": "/carlo/img/unlock/unlock_buisness_3.png",
-      "textIntro": "Trois lieux. Trois fonctions. Un seul système : le socle du business du Don.",
-      "questionPrompt": "Validez le dossier « KEY » après avoir identifié Bar (1), Docks (2) et Entrepôt (3).",
+      "textIntro": "Il avait fait le choix de séparer les fonctions, les lieux, les éléments. Il avait besoin de cela pour que son business fonctionne.",
+      "questionPrompt": "Des lieux. Ses fonctions. Un seul système : le socle du business du Don.",
       "onSuccess": {
         "unlockImages": [
-          "/carlo/img/unlock/unlock_buisness_key.png"
+          "/carlo/img/unlock/unlock_business_key.png"
         ],
         "textSuccess": "Un business bien établit, 3 lieux, 3 Mission."
       },
@@ -291,7 +291,7 @@
       },
       "archiveCard": {
         "title": "Phare – Accès",
-        "thumb": "/carlo/img/steps/step_phare.png",
+        "thumb": "/carlo/img/steps/unlock_phare.png",
         "content": "Un phare dans la nuit."
       }
     },
