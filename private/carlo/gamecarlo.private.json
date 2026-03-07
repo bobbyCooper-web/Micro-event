@@ -134,31 +134,13 @@
         }
       ]
     },
-    "ch4_trailer_exterior": {
-      "answerType": "number",
-      "answer": 18,
-      "requires": [
-        {
-          "type": "flag",
-          "key": "caravan_arrived",
-          "value": true
-        }
-      ],
-      "grant": [
-        {
-          "type": "flag",
-          "key": "caravan_exterior_ok",
-          "value": true
-        }
-      ]
-    },
     "ch4_trailer_interior": {
       "answerType": "number",
       "answer": 9,
       "requires": [
         {
           "type": "flag",
-          "key": "caravan_exterior_ok",
+          "key": "caravan_arrived",
           "value": true
         }
       ],
@@ -171,8 +153,9 @@
       ]
     },
     "ch5_lighthouse_gate": {
-      "answerType": "zip",
-      "answer": "PHARE",
+      "answerType": "manualGate",
+      "answer": null,
+      "manualFlag": "final_gate_opened",
       "requires": [],
       "grant": [
         {
